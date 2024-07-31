@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { getGamesOfTheDay } from "../configs/api";
-
+import HeaderComponent from "../components/HeaderComponent";
+import { styles } from "../styles/StylePartidas";
 const Partidas = () => {
   const [games, setGames] = useState({});
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -17,6 +11,13 @@ const Partidas = () => {
   useEffect(() => {
     const fetchGames = async () => {
       const gamesData = await getGamesOfTheDay();
+      console.log("Games data:", gamesData);
+
+      if (typeof gamesData !== "object" || gamesData === null) {
+        console.error("Unexpected games data format:", gamesData);
+        return;
+      }
+
       setGames(gamesData);
     };
 
@@ -32,7 +33,7 @@ const Partidas = () => {
         </Text>
         <Image source={{ uri: item.teams.away.logo }} style={styles.teamLogo} />
       </View>
-      <Text>{new Date(item.fixture.date).toLocaleString()}</Text>
+      <Text>{new Date(item.fixture.date).toLocaleTimeString()}</Text>
     </View>
   );
 
@@ -53,8 +54,8 @@ const Partidas = () => {
     >
       <Text>{item}</Text>
       <Text>
-        {Object.keys(games[item]).reduce(
-          (acc, league) => acc + games[item][league].length,
+        {Object.keys(games[item] || {}).reduce(
+          (acc, league) => acc + games[item][league]?.length,
           0
         )}
       </Text>
@@ -62,7 +63,8 @@ const Partidas = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.all}>
+      <HeaderComponent />
       <Text style={styles.title}>Jogos do Dia</Text>
       {selectedCountry === null ? (
         <FlatList
@@ -72,13 +74,13 @@ const Partidas = () => {
         />
       ) : selectedLeague === null ? (
         <FlatList
-          data={Object.keys(games[selectedCountry])}
+          data={Object.keys(games[selectedCountry] || {})}
           keyExtractor={(item) => item}
           renderItem={renderLeague}
         />
       ) : (
         <FlatList
-          data={games[selectedCountry][selectedLeague]}
+          data={games[selectedCountry][selectedLeague] || []}
           keyExtractor={(item) => item.fixture.id.toString()}
           renderItem={renderGame}
         />
@@ -96,50 +98,5 @@ const Partidas = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  countryItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  leagueItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  gameItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  teams: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  teamLogo: {
-    width: 20,
-    height: 20,
-    marginHorizontal: 5,
-  },
-  backButton: {
-    fontSize: 18,
-    color: "blue",
-    marginTop: 10,
-  },
-});
 
 export default Partidas;

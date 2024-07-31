@@ -49,7 +49,7 @@ export default function Routes() {
       }}
     >
       <Tab.Screen
-        name="Partidas"
+        name="Jogos do Dia"
         component={Partidas}
         options={{
           headerShown: false,

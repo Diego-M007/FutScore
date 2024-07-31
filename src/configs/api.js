@@ -37,3 +37,44 @@ export const getGamesOfTheDay = async () => {
     return {};
   }
 };
+export const getCountries = async () => {
+  try {
+    const response = await apiFootball.get("/countries");
+    return response.data.response;
+  } catch (error) {
+    console.error("Error fetching countries:", error);
+    return [];
+  }
+};
+
+export const getLeaguesByCountry = async (country) => {
+  try {
+    const response = await apiFootball.get(`/leagues?country=${country}`);
+    return response.data.response;
+  } catch (error) {
+    console.error(`Error fetching leagues for country ${country}:`, error);
+    return [];
+  }
+};
+
+export const getStandingsByLeague = async (leagueId) => {
+  try {
+    const response = await apiFootball.get(`/standings?league=${leagueId}`);
+    console.log(`Response for league ${leagueId}:`, response.data);
+
+    if (
+      response.data &&
+      response.data.response &&
+      response.data.response.length > 0
+    ) {
+      const standingsData = response.data.response[0].league.standings[0];
+      return standingsData;
+    } else {
+      console.error(`No standings data available for league ${leagueId}`);
+      return [];
+    }
+  } catch (error) {
+    console.error(`Error fetching standings for league ${leagueId}:`, error);
+    return [];
+  }
+};
