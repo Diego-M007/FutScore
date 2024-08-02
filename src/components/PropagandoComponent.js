@@ -20,7 +20,7 @@ export default function EspaçoPropaganda() {
           (propagandaExemplo.indexOf(prevAd) + 1) % propagandaExemplo.length;
         return propagandaExemplo[nextAdIndex];
       });
-    }, 12000); // 120 segundos
+    }, 5000); // 5 segundos
 
     return () => clearInterval(adInterval);
   }, []);
