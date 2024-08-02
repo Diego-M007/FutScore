@@ -6,18 +6,14 @@ import BotaoImagemComponent from "./BotãoImagemComponent";
 export default function HeaderComponent() {
   return (
     <View style={styles.generalheader}>
-      <View style={styles.IconeCalendar}>
-        <BotaoImagemComponent name={"calendar-alt"} size={20} color={"black"} />
-      </View>
+      <BotaoImagemComponent name={"calendar-alt"} size={25} color={"white"} />
       <View style={styles.DivLogo}>
         <ImgComponent
           ImageUri={require("../assets/Images/LogoFutScore.png")}
           ImageStyle={styles.futscore}
         />
       </View>
-      <View style={styles.IconLupa}>
-        <BotaoImagemComponent name={"search"} size={20} color={"black"} />
-      </View>
+      <BotaoImagemComponent name={"search"} size={25} color={"white"} />
     </View>
   );
 }
@@ -27,26 +23,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: "5%",
+    height: "8%", // Ajuste a altura conforme necessário
     width: "100%",
-    paddingHorizontal: "3%",
+    backgroundColor: "#2C2C2E",
+    borderBottomColor: "#2f9fa6",
+    borderBottomWidth: 1,
+    paddingHorizontal: 15, // Para evitar problemas de margem
   },
   DivLogo: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-  IconLupa: {
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  IconeCalendar: {
-    alignItems: "center",
-    justifyContent: "flex-start",
+    paddingTop: "2%",
   },
   futscore: {
-    width: "50%",
-    height: undefined,
+    height: 40, // Ajuste a altura conforme necessário para proporcionalidade
     resizeMode: "contain",
   },
 });

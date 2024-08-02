@@ -1,46 +1,19 @@
 import { StyleSheet } from "react-native";
 
-export const styles = StyleSheet.create({
-  title: {
+export const stylesPartidas = StyleSheet.create({
+  all: {
+    backgroundColor: "#000000",
+    flex: 1,
+    width: "100%",
+  },
+  Container: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  TextoPrincipal: {
+    color: "white",
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
-  },
-  countryItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  leagueItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  gameItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  teams: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  teamLogo: {
-    width: 20,
-    height: 20,
-    marginHorizontal: 5,
-  },
-  backButton: {
-    fontSize: 18,
-    color: "blue",
-    marginTop: 10,
-  },
-  all: {
-    backgroundColor: "grey",
-    flex: 1,
   },
 });

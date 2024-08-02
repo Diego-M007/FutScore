@@ -15,7 +15,15 @@ export default function BotaoImagemComponent({
 }) {
   return (
     // Props Touchable com o MaterialCOmmunityIcons
-    <TouchableOpacity style={fundo}>
+    <TouchableOpacity
+      style={[
+        fundo,
+        {
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      ]}
+    >
       <FontAwesome5
         name={name}
         size={size}
@@ -23,7 +31,6 @@ export default function BotaoImagemComponent({
         onPress={onPress}
         style={styleBtn}
       />
-      <TxtComponent texto={texto} styleTxt={styletexto} />
     </TouchableOpacity>
   );
 }

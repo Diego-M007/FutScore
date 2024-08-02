@@ -1,102 +1,98 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
-import { getGamesOfTheDay } from "../configs/api";
+import React, { useState, useEffect } from "react";
+import {
+  StatusBar,
+  SafeAreaView,
+  View,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import HeaderComponent from "../components/HeaderComponent";
-import { styles } from "../styles/StylePartidas";
-const Partidas = () => {
-  const [games, setGames] = useState({});
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedLeague, setSelectedLeague] = useState(null);
+import { stylesPartidas } from "../styles/StylePartidas";
+import TxtComponent from "../components/TxtComponent";
+import EspaçoPropaganda from "../components/PropagandoComponent";
+import CompeticaoCardComponent from "../components/CompetiçaoCardComponent";
+import apiFootball from "../configs/api";
+
+export default function Partidas() {
+  const [competicoes, setCompeticoes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGames = async () => {
-      const gamesData = await getGamesOfTheDay();
-      console.log("Games data:", gamesData);
+    const fetchJogosPorCompeticao = async () => {
+      try {
+        const response = await apiFootball.get("/fixtures", {
+          params: {
+            date: new Date().toISOString().split("T")[0],
+          },
+        });
 
-      if (typeof gamesData !== "object" || gamesData === null) {
-        console.error("Unexpected games data format:", gamesData);
-        return;
+        const competicoesMap = new Map();
+
+        response.data.response.forEach((jogo) => {
+          const compId = jogo.league.id;
+          if (!competicoesMap.has(compId)) {
+            competicoesMap.set(compId, {
+              nome: jogo.league.name,
+              imagem: jogo.league.logo,
+              quantidadeJogos: 0,
+              jogos: [],
+            });
+          }
+          const competicao = competicoesMap.get(compId);
+          competicao.quantidadeJogos += 1;
+          competicao.jogos.push({
+            timeCasa: jogo.teams.home.name,
+            logoCasa: jogo.teams.home.logo,
+            timeVisitante: jogo.teams.away.name,
+            logoVisitante: jogo.teams.away.logo,
+            horario: new Date(jogo.fixture.date).toLocaleTimeString(),
+          });
+        });
+
+        setCompeticoes(Array.from(competicoesMap.values()));
+      } catch (error) {
+        console.error("Erro ao buscar os jogos do dia:", error);
+      } finally {
+        setLoading(false);
       }
-
-      setGames(gamesData);
     };
 
-    fetchGames();
+    fetchJogosPorCompeticao();
   }, []);
 
-  const renderGame = ({ item }) => (
-    <View style={styles.gameItem}>
-      <View style={styles.teams}>
-        <Image source={{ uri: item.teams.home.logo }} style={styles.teamLogo} />
-        <Text>
-          {item.teams.home.name} vs {item.teams.away.name}
-        </Text>
-        <Image source={{ uri: item.teams.away.logo }} style={styles.teamLogo} />
-      </View>
-      <Text>{new Date(item.fixture.date).toLocaleTimeString()}</Text>
-    </View>
-  );
-
-  const renderLeague = ({ item }) => (
-    <TouchableOpacity
-      style={styles.leagueItem}
-      onPress={() => setSelectedLeague(item)}
-    >
-      <Text>{item}</Text>
-      <Text>{games[selectedCountry][item].length}</Text>
-    </TouchableOpacity>
-  );
-
-  const renderCountry = ({ item }) => (
-    <TouchableOpacity
-      style={styles.countryItem}
-      onPress={() => setSelectedCountry(item)}
-    >
-      <Text>{item}</Text>
-      <Text>
-        {Object.keys(games[item] || {}).reduce(
-          (acc, league) => acc + games[item][league]?.length,
-          0
-        )}
-      </Text>
-    </TouchableOpacity>
-  );
+  if (loading) {
+    return (
+      <SafeAreaView style={stylesPartidas.all}>
+        <StatusBar barStyle="light-content" />
+        <HeaderComponent />
+        <EspaçoPropaganda />
+        <View style={stylesPartidas.Container}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View style={styles.all}>
+    <SafeAreaView style={stylesPartidas.all}>
+      <StatusBar barStyle="light-content" />
       <HeaderComponent />
-      <Text style={styles.title}>Jogos do Dia</Text>
-      {selectedCountry === null ? (
-        <FlatList
-          data={Object.keys(games)}
-          keyExtractor={(item) => item}
-          renderItem={renderCountry}
+      <EspaçoPropaganda />
+      <ScrollView contentContainerStyle={stylesPartidas.Container}>
+        <TxtComponent
+          texto={"Jogos do Dia"}
+          styleTxt={stylesPartidas.TextoPrincipal}
         />
-      ) : selectedLeague === null ? (
-        <FlatList
-          data={Object.keys(games[selectedCountry] || {})}
-          keyExtractor={(item) => item}
-          renderItem={renderLeague}
-        />
-      ) : (
-        <FlatList
-          data={games[selectedCountry][selectedLeague] || []}
-          keyExtractor={(item) => item.fixture.id.toString()}
-          renderItem={renderGame}
-        />
-      )}
-      {selectedCountry !== null && (
-        <TouchableOpacity onPress={() => setSelectedCountry(null)}>
-          <Text style={styles.backButton}>Voltar</Text>
-        </TouchableOpacity>
-      )}
-      {selectedLeague !== null && (
-        <TouchableOpacity onPress={() => setSelectedLeague(null)}>
-          <Text style={styles.backButton}>Voltar</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+        {competicoes.map((comp, index) => (
+          <CompeticaoCardComponent
+            key={index}
+            imagem={comp.imagem}
+            nome={comp.nome}
+            quantidadeJogos={comp.quantidadeJogos}
+            jogos={comp.jogos}
+          />
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
-};
-
-export default Partidas;
+}

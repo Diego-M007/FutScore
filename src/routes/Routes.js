@@ -45,6 +45,9 @@ export default function Routes() {
           shadowOpacity: 0.3,
           shadowRadius: 4.65,
           elevation: 10,
+          backgroundColor: "#2C2C2E",
+          borderTopColor: "#2f9fa6",
+          borderTopWidth: 1,
         },
       }}
     >
