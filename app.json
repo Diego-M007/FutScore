@@ -4,12 +4,12 @@
     "slug": "FutScore",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./src/assets/Images/LogoFutScore.png",
+    "userInterfaceStyle": "black",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./src/assets/Images/LogoFutScore.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "black"
     },
     "ios": {
       "supportsTablet": true
