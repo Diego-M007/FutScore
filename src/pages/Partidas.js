@@ -10,7 +10,7 @@ import HeaderComponent from "../components/HeaderComponent";
 import { stylesPartidas } from "../styles/StylePartidas";
 import TxtComponent from "../components/TxtComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
-import CompeticaoCardComponent from "../components/CompetiçaoCardComponent";
+import CompeticaoCardComponent from "../components/CompeticaoCardComponent";
 import apiFootball from "../configs/api";
 
 // Função para obter o fuso horário local
