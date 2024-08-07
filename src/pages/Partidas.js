@@ -13,43 +13,68 @@ import EspaçoPropaganda from "../components/PropagandoComponent";
 import CompeticaoCardComponent from "../components/CompetiçaoCardComponent";
 import apiFootball from "../configs/api";
 
+// Função para obter o fuso horário local
+const getLocalTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 export default function Partidas() {
-  const [competicoes, setCompeticoes] = useState([]);
+  const [jogosPorCompeticao, setJogosPorCompeticao] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [timezone, setTimezone] = useState(null);
 
   useEffect(() => {
-    const fetchJogosPorCompeticao = async () => {
+    // Obter o fuso horário local
+    const localTimezone = getLocalTimezone();
+    setTimezone(localTimezone);
+
+    const fetchJogosDoDia = async () => {
+      const today = new Date();
+      const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+      const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+
       try {
         const response = await apiFootball.get("/fixtures", {
           params: {
             date: new Date().toISOString().split("T")[0],
+            timezone: localTimezone, // Adicionando o fuso horário na requisição
           },
         });
 
-        const competicoesMap = new Map();
+        const competicoes = {};
 
         response.data.response.forEach((jogo) => {
-          const compId = jogo.league.id;
-          if (!competicoesMap.has(compId)) {
-            competicoesMap.set(compId, {
-              nome: jogo.league.name,
-              imagem: jogo.league.logo,
-              quantidadeJogos: 0,
-              jogos: [],
+          const jogoDataUTC = new Date(jogo.fixture.date);
+          const jogoData = new Date(
+            jogoDataUTC.toLocaleString("en-US", { timeZone: localTimezone })
+          );
+
+          if (jogoData >= startOfToday && jogoData <= endOfToday) {
+            const competicao = jogo.league.name;
+            if (!competicoes[competicao]) {
+              competicoes[competicao] = {
+                imagem: jogo.league.logo,
+                nome: competicao,
+                jogos: [],
+              };
+            }
+
+            competicoes[competicao].jogos.push({
+              timeCasa: jogo.teams.home.name,
+              logoCasa: jogo.teams.home.logo,
+              timeVisitante: jogo.teams.away.name,
+              logoVisitante: jogo.teams.away.logo,
+              horario: jogoData.toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              resultado:
+                jogo.goals.home !== null && jogo.goals.away !== null
+                  ? `${jogo.goals.home} - ${jogo.goals.away}`
+                  : null,
             });
           }
-          const competicao = competicoesMap.get(compId);
-          competicao.quantidadeJogos += 1;
-          competicao.jogos.push({
-            timeCasa: jogo.teams.home.name,
-            logoCasa: jogo.teams.home.logo,
-            timeVisitante: jogo.teams.away.name,
-            logoVisitante: jogo.teams.away.logo,
-            horario: new Date(jogo.fixture.date).toLocaleTimeString(),
-          });
         });
 
-        setCompeticoes(Array.from(competicoesMap.values()));
+        setJogosPorCompeticao(Object.values(competicoes));
       } catch (error) {
         console.error("Erro ao buscar os jogos do dia:", error);
       } finally {
@@ -57,8 +82,8 @@ export default function Partidas() {
       }
     };
 
-    fetchJogosPorCompeticao();
-  }, []);
+    fetchJogosDoDia();
+  }, [timezone]);
 
   if (loading) {
     return (
@@ -83,13 +108,13 @@ export default function Partidas() {
           texto={"Jogos do Dia"}
           styleTxt={stylesPartidas.TextoPrincipal}
         />
-        {competicoes.map((comp, index) => (
+        {jogosPorCompeticao.map((competicao, index) => (
           <CompeticaoCardComponent
             key={index}
-            imagem={comp.imagem}
-            nome={comp.nome}
-            quantidadeJogos={comp.quantidadeJogos}
-            jogos={comp.jogos}
+            imagem={competicao.imagem}
+            nome={competicao.nome}
+            quantidadeJogos={competicao.jogos.length}
+            jogos={competicao.jogos}
           />
         ))}
       </ScrollView>

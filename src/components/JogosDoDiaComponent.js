@@ -11,18 +11,20 @@ export default function JogosDoDiaComponent({ jogos }) {
   return (
     <View style={styles.container}>
       {jogos.map((jogo, index) => (
-        <View key={index} style={styles.shadowContainer}>
-          <View style={styles.jogoContainer}>
-            <Image source={{ uri: jogo.logoCasa }} style={styles.logo} />
-            <View style={styles.teamContainerHome}>
-              <Text style={styles.equipes}>{`${jogo.timeCasa}`}</Text>
-            </View>
-            <Text style={styles.horario}>{formatHorario(jogo.horario)}</Text>
-            <View style={styles.teamContainerAway}>
-              <Text style={styles.equipes}>{`${jogo.timeVisitante}`}</Text>
-            </View>
-            <Image source={{ uri: jogo.logoVisitante }} style={styles.logo} />
+        <View key={index} style={styles.jogoContainer}>
+          <Image source={{ uri: jogo.logoCasa }} style={styles.logo} />
+          <View style={styles.teamContainerHome}>
+            <Text style={styles.equipes}>{`${jogo.timeCasa}`}</Text>
           </View>
+          {jogo.resultado ? (
+            <Text style={styles.resultado}>{jogo.resultado}</Text>
+          ) : (
+            <Text style={styles.horario}>{formatHorario(jogo.horario)}</Text>
+          )}
+          <View style={styles.teamContainerAway}>
+            <Text style={styles.equipes}>{`${jogo.timeVisitante}`}</Text>
+          </View>
+          <Image source={{ uri: jogo.logoVisitante }} style={styles.logo} />
         </View>
       ))}
     </View>
@@ -33,19 +35,6 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
   },
-  shadowContainer: {
-    shadowColor: "#E5E5E7",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-    marginVertical: 10,
-    backgroundColor: "transparent",
-    borderRadius: 10,
-  },
   jogoContainer: {
     borderWidth: 1,
     borderColor: "#2f9fa6",
@@ -53,8 +42,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    padding: 10,
-    backgroundColor: "#2C2C2E",
+    marginTop: 10,
+    padding: 5,
     borderRadius: 10,
   },
   teamContainerHome: {
@@ -74,6 +63,8 @@ const styles = StyleSheet.create({
   logo: {
     width: 30,
     height: 30,
+    borderRadius: 10,
+    resizeMode: "contain",
   },
   equipes: {
     fontSize: 15,
@@ -87,6 +78,16 @@ const styles = StyleSheet.create({
     borderColor: "#2f9fa6",
     paddingHorizontal: 10,
     textAlign: "center",
-    marginHorizontal: 10,
+    margin: 10,
+  },
+  resultado: {
+    fontSize: 15,
+    color: "white",
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "#2f9fa6",
+    paddingHorizontal: 10,
+    textAlign: "center",
+    margin: 10,
   },
 });
