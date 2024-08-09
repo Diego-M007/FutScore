@@ -61,13 +61,13 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   logo: {
-    width: 30,
-    height: 30,
+    width: 35,
+    height: 35,
     borderRadius: 10,
     resizeMode: "contain",
   },
   equipes: {
-    fontSize: 15,
+    fontSize: 13,
     color: "white",
   },
   horario: {

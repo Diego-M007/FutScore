@@ -70,10 +70,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   imagem: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     marginRight: 10,
     borderRadius: 10,
+    resizeMode: "contain",
   },
   info: {
     flex: 1,

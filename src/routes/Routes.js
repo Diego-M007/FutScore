@@ -7,6 +7,8 @@ import Partidas from "../pages/Partidas";
 import Torneios from "../pages/Torneios";
 import Perfil from "../pages/Perfil";
 import Favoritos from "../pages/Favoritos";
+import Splash from "../pages/splash";
+import Login from "../pages/Login";
 
 // Importando Icons
 import { FontAwesome } from "@expo/vector-icons";
@@ -51,6 +53,22 @@ export default function Routes() {
         },
       }}
     >
+      <Tab.Screen
+        name="Splash"
+        component={Splash}
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Login"
+        component={Login}
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
       <Tab.Screen
         name="Jogos do Dia"
         component={Partidas}

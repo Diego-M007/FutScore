@@ -11,6 +11,10 @@
       "resizeMode": "contain",
       "backgroundColor": "black"
     },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -22,6 +26,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "googleClientId": "880894382932-3jovad1stn0bl0l21rj5pposmhur5q27.apps.googleusercontent.com",
+      "redirectUri": "https://auth.expo.io/@diego_miranda/FutScore"
     }
   }
 }

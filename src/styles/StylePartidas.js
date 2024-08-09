@@ -15,5 +15,7 @@ export const stylesPartidas = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 15,
   },
 });
