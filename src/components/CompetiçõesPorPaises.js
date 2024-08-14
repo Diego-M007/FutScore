@@ -434,7 +434,7 @@ const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
           const competicoes = jogosPorPais[pais];
           const isExpanded = expandedCountries[pais];
           const translatedName = countryNames[pais] || pais;
-          const flagCode = countryCodes[pais] || "UN";
+          const flagCode = countryCodes[pais] || "UN"; // Usa um código padrão para bandeiras não disponíveis
 
           return (
             <View style={styles.paisContainer}>
@@ -465,16 +465,17 @@ const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 5,
+    padding: 10,
     width: "100%",
   },
   paisContainer: {
     marginBottom: 10,
     width: "100%",
-    borderWidth: 0.2,
+    borderWidth: 0.5,
     borderColor: "#2f9fa6",
-    borderRadius: 5,
+    borderRadius: 8,
     padding: 10,
+    backgroundColor: "#2C2C2E",
   },
   paisHeader: {
     flexDirection: "row",

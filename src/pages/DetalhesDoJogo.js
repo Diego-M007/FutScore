@@ -16,21 +16,19 @@ export default function DetalhesDoJogo({ route }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Função para buscar os detalhes do jogo
     const fetchDetalhesDoJogo = async () => {
       try {
         const response = await axios.get(
           `https://v3.football.api-sports.io/fixtures`,
           {
-            params: {
-              id: jogoId,
-            },
+            params: { id: jogoId },
             headers: {
               "x-rapidapi-key": API_FOOTBALL_KEY,
               "x-rapidapi-host": "v3.football.api-sports.io",
             },
           }
         );
+        console.log("Detalhes do jogo:", response.data.response[0]); // Verifique os dados
         setJogo(response.data.response[0]);
         setLoading(false);
       } catch (error) {
@@ -89,7 +87,7 @@ export default function DetalhesDoJogo({ route }) {
       <View style={styles.eventsContainer}>
         <Text style={styles.sectionTitle}>Eventos do Jogo</Text>
         {events.map((event, index) => (
-          <View key={index} style={styles.event}>
+          <View key={event.id} style={styles.event}>
             <Text>
               {event.time.elapsed}' - {event.team.name}
             </Text>
@@ -104,7 +102,7 @@ export default function DetalhesDoJogo({ route }) {
       <View style={styles.statisticsContainer}>
         <Text style={styles.sectionTitle}>Estatísticas</Text>
         {statistics.map((stat, index) => (
-          <View key={index} style={styles.stat}>
+          <View key={stat.id} style={styles.stat}>
             <Text>
               {stat.team.name}: {stat.statistics[0].value}
             </Text>

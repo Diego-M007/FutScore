@@ -11,17 +11,18 @@ const formatHorario = (horario) => {
 export default function JogosDoDiaComponent({ jogos }) {
   const navigation = useNavigation();
 
+  console.log("Jogos:", jogos); // Adicione para verificar os dados
+
   return (
     <View style={styles.container}>
       {jogos.map((jogo) => (
         <TouchableOpacity
-          key={jogo.fixture?.id || jogo.id} // Garanta que a key seja única
+          key={jogo.fixture?.id} // Garanta que a key seja única
           style={styles.jogoContainer}
-          onPress={
-            () =>
-              navigation.navigate("DetalhesDoJogo", {
-                jogoId: jogo.fixture?.id,
-              }) // Adicione verificação segura
+          onPress={() =>
+            navigation.navigate("DetalhesDoJogo", {
+              jogoId: jogo.fixture?.id,
+            })
           }
         >
           <Image source={{ uri: jogo.logoCasa }} style={styles.logo} />
