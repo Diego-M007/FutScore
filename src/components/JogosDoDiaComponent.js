@@ -1,6 +1,7 @@
 // src/components/JogosDoDiaComponent.js
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const formatHorario = (horario) => {
   const [horas, minutos] = horario.split(":");
@@ -8,10 +9,21 @@ const formatHorario = (horario) => {
 };
 
 export default function JogosDoDiaComponent({ jogos }) {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
-      {jogos.map((jogo, index) => (
-        <View key={index} style={styles.jogoContainer}>
+      {jogos.map((jogo) => (
+        <TouchableOpacity
+          key={jogo.fixture?.id || jogo.id} // Garanta que a key seja única
+          style={styles.jogoContainer}
+          onPress={
+            () =>
+              navigation.navigate("DetalhesDoJogo", {
+                jogoId: jogo.fixture?.id,
+              }) // Adicione verificação segura
+          }
+        >
           <Image source={{ uri: jogo.logoCasa }} style={styles.logo} />
           <View style={styles.teamContainerHome}>
             <Text style={styles.equipes}>{`${jogo.timeCasa}`}</Text>
@@ -25,7 +37,7 @@ export default function JogosDoDiaComponent({ jogos }) {
             <Text style={styles.equipes}>{`${jogo.timeVisitante}`}</Text>
           </View>
           <Image source={{ uri: jogo.logoVisitante }} style={styles.logo} />
-        </View>
+        </TouchableOpacity>
       ))}
     </View>
   );
