@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
-  ActivityIndicator,
   ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -13,6 +14,7 @@ import { stylesPartidas } from "../styles/StylePartidas";
 import { API_FOOTBALL_KEY } from "@env";
 import TxtComponent from "../components/TxtComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
+import { Video, ResizeMode } from "expo-av";
 
 export default function Partidas() {
   const [jogosPorPais, setJogosPorPais] = useState({});
@@ -73,6 +75,7 @@ export default function Partidas() {
                 jogo.goals.home !== null && jogo.goals.away !== null
                   ? `${jogo.goals.home} - ${jogo.goals.away}`
                   : null,
+              fixtureId: jogo.fixture.id, // Adicione o fixtureId aqui
             });
           }
         });
@@ -93,7 +96,19 @@ export default function Partidas() {
       <SafeAreaView style={stylesPartidas.all}>
         <StatusBar barStyle="light-content" />
         <HeaderComponent />
-        <ActivityIndicator size="large" color="#fff" />
+        <View style={styles.videoContainer}>
+          <Video
+            style={styles.video}
+            resizeMode={ResizeMode.CONTAIN} // Ajuste para CONTAIN ou COVER conforme necessário
+            source={require("../assets/Images/Video/Splash.mp4")}
+            shouldPlay
+            isLooping={false}
+            isMuted={true}
+            onError={(error) =>
+              console.error("Erro ao carregar o vídeo:", error)
+            }
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -113,3 +128,15 @@ export default function Partidas() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  videoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  video: {
+    width: "1550%",
+    height: "50%",
+  },
+});

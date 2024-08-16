@@ -3,77 +3,50 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "center",
+    backgroundColor: "#2C2C2E",
     padding: 20,
   },
   headerContainer: {
     width: "100%",
-    backgroundColor: "#E8E8E8",
+    backgroundColor: "#3E3E42", // Adjusted to a darker gray to match the new background
     padding: 20,
     alignItems: "center",
     marginBottom: 20,
   },
-  iconTextContainer: {
-    width: "100%", // Ajuste para garantir que o conteúdo ocupe toda a largura
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  rowContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-    width: "100%", // Garantir que o ícone e o texto ocupem toda a largura
-  },
   iconBackground: {
-    backgroundColor: "#E0E0E0",
-    borderRadius: 20,
-    padding: 10,
+    backgroundColor: "#5A5A5E", // Adjusted to a slightly lighter gray to complement the header
+    borderRadius: 22.5,
+    padding: 7.5,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    marginBottom: 10,
   },
   icon: {
-    color: "#808080",
+    color: "#D1D1D3", // Adjusted to a lighter gray for better contrast
   },
   headerText: {
     fontSize: 15,
-    color: "black",
-    textAlign: "left",
-    flex: 1, // Adiciona flex para o texto ocupar o espaço restante
+    color: "#FFFFFF", // Changed to white for readability against the darker background
+    textAlign: "center",
+    marginBottom: 10,
   },
   divider: {
-    width: "100%", // Largura completa para atravessar a tela
-    height: 1, // Altura de 1 pixel
-    backgroundColor: "#B0B0B0",
-    marginVertical: 10, // Espaçamento vertical entre elementos
+    width: "100%",
+    height: 1,
+    backgroundColor: "#6A6A6D", // Adjusted to a darker gray to match the new theme
+    marginVertical: 10,
   },
   buttonEntrar: {
     padding: 10,
-    backgroundColor: "blue",
+    backgroundColor: "#2f9fa6", // Kept the button color as requested
     borderRadius: 20,
     width: "50%",
-  },
-  button: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "blue",
-    borderRadius: 5,
+    alignItems: "center",
   },
   buttonText: {
     fontSize: 16,
     color: "white",
     textAlign: "center",
-  },
-  text: {
-    fontSize: 16,
-    color: "black",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   modalContainer: {
     flex: 1,
@@ -84,7 +57,7 @@ export default StyleSheet.create({
   modalContent: {
     width: "80%",
     height: "50%",
-    backgroundColor: "white",
+    backgroundColor: "#3E3E42", // Adjusted to match the header background
     borderRadius: 10,
     padding: 20,
     alignItems: "center",
@@ -97,6 +70,7 @@ export default StyleSheet.create({
   },
   modalText: {
     fontSize: 18,
+    color: "#FFFFFF", // Changed to white for readability
     marginBottom: 20,
     textAlign: "center",
   },

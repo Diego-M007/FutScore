@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import axios from "axios";
+import moment from "moment-timezone";
 import { API_FOOTBALL_KEY } from "@env";
 
 export default function DetalhesDoJogo({ route }) {
@@ -28,8 +29,13 @@ export default function DetalhesDoJogo({ route }) {
             },
           }
         );
-        console.log("Detalhes do jogo:", response.data.response[0]); // Verifique os dados
-        setJogo(response.data.response[0]);
+        console.log("Response Data:", response.data); // Verifique toda a resposta
+        if (response.data.response && response.data.response.length > 0) {
+          console.log("Detalhes do jogo:", response.data.response[0]);
+          setJogo(response.data.response[0]);
+        } else {
+          console.log("Nenhum detalhe encontrado para o jogo com id:", jogoId);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Erro ao buscar detalhes do jogo:", error);
@@ -60,12 +66,17 @@ export default function DetalhesDoJogo({ route }) {
 
   const { teams, fixture, league, events, statistics, lineups } = jogo;
 
+  // Convertendo a data e hora para o fuso horário "America/Sao_Paulo"
+  const dataHoraJogo = moment
+    .tz(fixture.date, "America/Sao_Paulo")
+    .format("DD/MM/YYYY HH:mm");
+
   return (
     <ScrollView style={styles.container}>
       {/* Informações principais do jogo */}
       <View style={styles.infoContainer}>
         <Text style={styles.competition}>{league.name}</Text>
-        <Text style={styles.date}>{fixture.date}</Text>
+        <Text style={styles.date}>{dataHoraJogo}</Text>
         <Text style={styles.venue}>{fixture.venue.name}</Text>
         <Text style={styles.referee}>Árbitro: {fixture.referee}</Text>
       </View>
@@ -86,43 +97,49 @@ export default function DetalhesDoJogo({ route }) {
       {/* Exibição de eventos */}
       <View style={styles.eventsContainer}>
         <Text style={styles.sectionTitle}>Eventos do Jogo</Text>
-        {events.map((event, index) => (
-          <View key={event.id} style={styles.event}>
-            <Text>
-              {event.time.elapsed}' - {event.team.name}
-            </Text>
-            <Text>
-              {event.player.name} ({event.type})
-            </Text>
-          </View>
-        ))}
+        {events.length > 0 ? (
+          events.map((event) => (
+            <View key={event.id} style={styles.event}>
+              <Text>{`${event.time.elapsed}' - ${event.team.name}`}</Text>
+              <Text>{`${event.player.name} (${event.type})`}</Text>
+            </View>
+          ))
+        ) : (
+          <Text>Nenhum evento registrado.</Text>
+        )}
       </View>
 
       {/* Exibição de estatísticas */}
       <View style={styles.statisticsContainer}>
         <Text style={styles.sectionTitle}>Estatísticas</Text>
-        {statistics.map((stat, index) => (
-          <View key={stat.id} style={styles.stat}>
-            <Text>
-              {stat.team.name}: {stat.statistics[0].value}
-            </Text>
-          </View>
-        ))}
+        {statistics.length > 0 ? (
+          statistics.map((stat) => (
+            <View key={stat.id} style={styles.stat}>
+              <Text>{`${stat.team.name}: ${stat.statistics[0].value}`}</Text>
+            </View>
+          ))
+        ) : (
+          <Text>Nenhuma estatística disponível.</Text>
+        )}
       </View>
 
       {/* Exibição de escalações */}
       <View style={styles.lineupsContainer}>
         <Text style={styles.sectionTitle}>Escalações</Text>
-        {lineups.map((lineup, index) => (
-          <View key={index} style={styles.lineup}>
-            <Text>{lineup.team.name}</Text>
-            {lineup.startXI.map((player, index) => (
-              <Text key={index}>
-                {player.player.name} - {player.player.position}
-              </Text>
-            ))}
-          </View>
-        ))}
+        {lineups.length > 0 ? (
+          lineups.map((lineup, index) => (
+            <View key={index} style={styles.lineup}>
+              <Text>{lineup.team.name}</Text>
+              {lineup.startXI.map((player, index) => (
+                <Text key={index}>
+                  {player.player.name} - {player.player.position}
+                </Text>
+              ))}
+            </View>
+          ))
+        ) : (
+          <Text>Escalações não disponíveis.</Text>
+        )}
       </View>
     </ScrollView>
   );

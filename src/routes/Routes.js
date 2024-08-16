@@ -60,6 +60,7 @@ export default function Routes() {
         options={{
           tabBarButton: () => null,
           headerShown: false,
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tab.Screen
@@ -71,7 +72,7 @@ export default function Routes() {
         }}
       />
       <Tab.Screen
-        name="DetalhesJogo"
+        name="DetalhesDoJogo"
         component={DetalhesDoJogo}
         options={{
           tabBarButton: () => null,

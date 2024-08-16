@@ -133,9 +133,9 @@ const countryNames = {
   Myanmar: "Mianmar",
   Namibia: "Namíbia",
   Nauru: "Nauru",
+  "New-Zealand": "Nova Zelândia",
   Nepal: "Nepal",
   Netherlands: "Países Baixos",
-  "New-Zealand": "Nova Zelândia",
   Nicaragua: "Nicarágua",
   Niger: "Níger",
   Nigeria: "Nigéria",
@@ -159,23 +159,23 @@ const countryNames = {
   "Saint-Lucia": "Santa Lúcia",
   "Saint-Vincent-and-the-Grenadines": "São Vicente e Granadinas",
   Samoa: "Samoa",
-  San_Marino: "San Marino",
-  Sao_Tome_and_Principe: "São Tomé e Príncipe",
+  "San-Marino": "San Marino",
+  "Sao-Tome-and-Principe": "São Tomé e Príncipe",
   "Saudi-Arabia": "Arábia Saudita",
   Scotland: "Escócia",
   Senegal: "Senegal",
   Serbia: "Sérvia",
   Seychelles: "Seicheles",
-  Sierra_Leone: "Serra Leoa",
+  "Sierra-Leone": "Serra Leoa",
   Singapore: "Singapura",
   Slovakia: "Eslováquia",
   Slovenia: "Eslovênia",
-  Solomon_Islands: "Ilhas Salomão",
+  "Solomon-Islands": "Ilhas Salomão",
   Somalia: "Somália",
-  South_Africa: "África do Sul",
-  South_Sudan: "Sudão do Sul",
+  "South-Africa": "África do Sul",
+  "South-Sudan": "Sudão do Sul",
   Spain: "Espanha",
-  Sri_Lanka: "Sri Lanka",
+  "Sri-Lanka": "Sri Lanka",
   Sudan: "Sudão",
   Suriname: "Suriname",
   Sweden: "Suécia",
@@ -187,7 +187,7 @@ const countryNames = {
   Thailand: "Tailândia",
   Togo: "Togo",
   Tonga: "Tonga",
-  Trinidad_and_Tobago: "Trinidad e Tobago",
+  "Trinidad-and-Tobago": "Trinidad e Tobago",
   Tunisia: "Tunísia",
   Turkey: "Turquia",
   Turkmenistan: "Turcomenistão",
@@ -200,10 +200,11 @@ const countryNames = {
   Uruguay: "Uruguai",
   Uzbekistan: "Uzbequistão",
   Vanuatu: "Vanuatu",
-  Vatican_City: "Vaticano",
+  "Vatican-City": "Vaticano",
   Venezuela: "Venezuela",
   Vietnam: "Vietnã",
   Yemen: "Iémen",
+  Wales: "País de Gales",
   Zambia: "Zâmbia",
   Zimbabwe: "Zimbábue",
   World: "Mundo",
@@ -231,39 +232,39 @@ const countryCodes = {
   Benin: "BJ",
   Bhutan: "BT",
   Bolivia: "BO",
-  Bosnia_and_Herzegovina: "BA",
+  "Bosnia-and-Herzegovina": "BA",
   Botswana: "BW",
   Brazil: "BR",
   Brunei: "BN",
   Bulgaria: "BG",
-  Burkina_Faso: "BF",
+  "Burkina-Faso": "BF",
   Burundi: "BI",
-  Cabo_Verde: "CV",
+  "Cabo-Verde": "CV",
   Cambodia: "KH",
   Cameroon: "CM",
   Canada: "CA",
-  Central_African_Republic: "CF",
+  "Central-African-Republic": "CF",
   Chad: "TD",
   Chile: "CL",
   China: "CN",
   Colombia: "CO",
   Comoros: "KM",
   Congo: "CG",
-  Costa_Rica: "CR",
+  "Costa-Rica": "CR",
   Croatia: "HR",
   Cuba: "CU",
   Cyprus: "CY",
-  Czech_Republic: "CZ",
+  "Czech-Republic": "CZ",
   Denmark: "DK",
   Djibouti: "DJ",
   Dominica: "DM",
   "Dominican-Republic": "DO",
-  East_Timor: "TL",
+  "East-Timor": "TL",
   Ecuador: "EC",
   Egypt: "EG",
-  El_Salvador: "SV",
-  Equatorial_Guinea: "GQ",
-  England: "UK",
+  England: "GB",
+  "El-Salvador": "SV",
+  "Equatorial-Guinea": "GQ",
   Eritrea: "ER",
   Estonia: "EE",
   Eswatini: "SZ",
@@ -280,7 +281,7 @@ const countryCodes = {
   Grenada: "GD",
   Guatemala: "GT",
   Guinea: "GN",
-  Guinea_Bissau: "GW",
+  "Guinea-Bissau": "GW",
   Guyana: "GY",
   Haiti: "HT",
   Honduras: "HN",
@@ -299,8 +300,8 @@ const countryCodes = {
   Kazakhstan: "KZ",
   Kenya: "KE",
   Kiribati: "KI",
-  Korea_North: "KP",
-  Korea_South: "KR",
+  "Korea-North": "KP",
+  "Korea-South": "KR",
   Kosovo: "XK",
   Kuwait: "KW",
   Kyrgyzstan: "KG",
@@ -319,7 +320,7 @@ const countryCodes = {
   Maldives: "MV",
   Mali: "ML",
   Malta: "MT",
-  Marshall_Islands: "MH",
+  "Marshall-Islands": "MH",
   Mauritania: "MR",
   Mauritius: "MU",
   Mexico: "MX",
@@ -333,19 +334,19 @@ const countryCodes = {
   Myanmar: "MM",
   Namibia: "NA",
   Nauru: "NR",
+  "New-Zealand": "NZ",
   Nepal: "NP",
   Netherlands: "NL",
-  New_Zealand: "NZ",
   Nicaragua: "NI",
   Niger: "NE",
   Nigeria: "NG",
-  North_Macedonia: "MK",
+  "North-Macedonia": "MK",
   Norway: "NO",
   Oman: "OM",
   Pakistan: "PK",
   Palau: "PW",
   Panama: "PA",
-  Papua_New_Guinea: "PG",
+  "Papua-New-Guinea": "PG",
   Paraguay: "PY",
   Peru: "PE",
   Philippines: "PH",
@@ -355,27 +356,27 @@ const countryCodes = {
   Romania: "RO",
   Russia: "RU",
   Rwanda: "RW",
-  Saint_Kitts_and_Nevis: "KN",
-  Saint_Lucia: "LC",
-  Saint_Vincent_and_the_Grenadines: "VC",
+  "Saint-Kitts-and-Nevis": "KN",
+  "Saint-Lucia": "LC",
+  "Saint-Vincent-and-the-Grenadines": "VC",
   Samoa: "WS",
-  San_Marino: "SM",
-  Sao_Tome_and_Principe: "ST",
+  "San-Marino": "SM",
+  "Sao-Tome-and-Principe": "ST",
   "Saudi-Arabia": "SA",
-  Scotland: "Sld",
+  Scotland: "GB",
   Senegal: "SN",
   Serbia: "RS",
   Seychelles: "SC",
-  Sierra_Leone: "SL",
+  "Sierra-Leone": "SL",
   Singapore: "SG",
   Slovakia: "SK",
   Slovenia: "SI",
-  Solomon_Islands: "SB",
+  "Solomon-Islands": "SB",
   Somalia: "SO",
-  South_Africa: "ZA",
-  South_Sudan: "SS",
+  "South-Africa": "ZA",
+  "South-Sudan": "SS",
   Spain: "ES",
-  Sri_Lanka: "LK",
+  "Sri-Lanka": "LK",
   Sudan: "SD",
   Suriname: "SR",
   Sweden: "SE",
@@ -387,26 +388,27 @@ const countryCodes = {
   Thailand: "TH",
   Togo: "TG",
   Tonga: "TO",
-  Trinidad_and_Tobago: "TT",
+  "Trinidad-and-Tobago": "TT",
   Tunisia: "TN",
   Turkey: "TR",
   Turkmenistan: "TM",
   Tuvalu: "TV",
   Uganda: "UG",
   Ukraine: "UA",
-  United_Arab_Emirates: "AE",
-  United_Kingdom: "GB",
+  "United-Arab-Emirates": "AE",
+  "United-Kingdom": "GB",
   USA: "US",
   Uruguay: "UY",
   Uzbekistan: "UZ",
   Vanuatu: "VU",
-  Vatican_City: "VA",
+  "Vatican-City": "VA",
   Venezuela: "VE",
   Vietnam: "VN",
   Yemen: "YE",
+  Wales: "GB",
   Zambia: "ZM",
   Zimbabwe: "ZW",
-  World: "GLOBAL",
+  World: "WLD",
 };
 
 const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
@@ -436,24 +438,52 @@ const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
           const translatedName = countryNames[pais] || pais;
           const flagCode = countryCodes[pais] || "UN"; // Usa um código padrão para bandeiras não disponíveis
 
+          // Calcular o total de jogos e jogos finalizados
+          const totalJogos = competicoes.reduce(
+            (acc, competicao) => acc + competicao.jogos.length,
+            0
+          );
+          const totalFinalizados = competicoes.reduce(
+            (acc, competicao) =>
+              acc + competicao.jogos.filter((jogo) => jogo.finalizado).length,
+            0
+          );
+
           return (
             <View style={styles.paisContainer}>
               <TouchableOpacity onPress={() => toggleExpand(pais)}>
                 <View style={styles.paisHeader}>
                   <Flag code={flagCode} size={32} />
                   <Text style={styles.paisTitulo}>{translatedName}</Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "bold",
+                      color: "#fff",
+                      marginLeft: "10%",
+                    }}
+                  >
+                    {totalFinalizados} / {totalJogos}
+                  </Text>
                 </View>
               </TouchableOpacity>
               {isExpanded &&
-                competicoes.map((competicao, index) => (
-                  <CompeticaoCardComponent
-                    key={index}
-                    imagem={competicao.imagem}
-                    nome={competicao.nome}
-                    quantidadeJogos={competicao.jogos.length}
-                    jogos={competicao.jogos}
-                  />
-                ))}
+                competicoes.map((competicao, index) => {
+                  const totalJogosCompeticao = competicao.jogos.length;
+                  const finalizados = competicao.jogos.filter(
+                    (jogo) => jogo.finalizado
+                  ).length;
+                  return (
+                    <CompeticaoCardComponent
+                      key={index}
+                      imagem={competicao.imagem}
+                      nome={competicao.nome}
+                      quantidadeJogos={totalJogosCompeticao} // Total de jogos
+                      finalizados={finalizados} // Jogos finalizados
+                      jogos={competicao.jogos}
+                    />
+                  );
+                })}
             </View>
           );
         }}

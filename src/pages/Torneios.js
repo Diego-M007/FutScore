@@ -2,13 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
-  ActivityIndicator,
   ScrollView,
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
   StyleSheet,
+  View,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -18,21 +14,20 @@ import { stylesPartidas } from "../styles/StylePartidas";
 import { API_FOOTBALL_KEY } from "@env";
 import TxtComponent from "../components/TxtComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
+import { Video, ResizeMode } from "expo-av";
 
 export default function Torneios() {
-  const [competicoesPorPais, setCompeticoesPorPais] = useState({});
+  const [torneiosPorPais, setTorneiosPorPais] = useState({});
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCompetition, setSelectedCompetition] = useState(null);
   const timezone = "America/Sao_Paulo";
 
   useEffect(() => {
-    const fetchCompeticoes = async () => {
+    const fetchTorneios = async () => {
       try {
         const today = moment().tz(timezone).format("YYYY-MM-DD");
 
         const response = await axios.get(
-          "https://v3.football.api-sports.io/fixtures",
+          "https://v3.football.api-sports.io/leagues",
           {
             params: {
               date: today,
@@ -47,9 +42,9 @@ export default function Torneios() {
 
         const paises = {};
 
-        response.data.response.forEach((jogo) => {
-          const pais = jogo.league.country;
-          const competicao = jogo.league.name;
+        response.data.response.forEach((torneio) => {
+          const pais = torneio.country.name;
+          const competicao = torneio.league.name;
 
           if (!paises[pais]) {
             paises[pais] = [];
@@ -62,40 +57,43 @@ export default function Torneios() {
           if (!competicaoObj) {
             competicaoObj = {
               nome: competicao,
-              imagem: jogo.league.logo,
-              jogos: [],
+              imagem: torneio.league.logo,
+              temporadaAtual: torneio.seasons.find((season) => season.current)
+                ?.year,
             };
             paises[pais].push(competicaoObj);
           }
         });
 
-        setCompeticoesPorPais(paises);
+        setTorneiosPorPais(paises);
       } catch (error) {
-        console.error("Erro ao buscar as competições:", error);
+        console.error("Erro ao buscar os torneios do dia:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCompeticoes();
+    fetchTorneios();
   }, []);
-
-  const openModal = (competicao) => {
-    setSelectedCompetition(competicao);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setSelectedCompetition(null);
-  };
 
   if (loading) {
     return (
       <SafeAreaView style={stylesPartidas.all}>
         <StatusBar barStyle="light-content" />
         <HeaderComponent />
-        <ActivityIndicator size="large" color="#fff" />
+        <View style={styles.videoContainer}>
+          <Video
+            style={styles.video}
+            resizeMode={ResizeMode.CONTAIN}
+            source={require("../assets/Images/Video/Splash.mp4")}
+            shouldPlay
+            isLooping={false}
+            isMuted={true}
+            onError={(error) =>
+              console.error("Erro ao carregar o vídeo:", error)
+            }
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -106,70 +104,24 @@ export default function Torneios() {
       <HeaderComponent />
       <EspaçoPropaganda />
       <TxtComponent
-        texto={"Competições"}
+        texto={"Torneios do Dia"}
         styleTxt={stylesPartidas.TextoPrincipal}
       />
       <ScrollView contentContainerStyle={stylesPartidas.Container}>
-        {Object.keys(competicoesPorPais).map((pais) => (
-          <View key={pais}>
-            <TxtComponent
-              texto={pais}
-              styleTxt={stylesPartidas.TextoSecundario}
-            />
-            {competicoesPorPais[pais].map((competicao, index) => (
-              <TouchableOpacity
-                key={`${competicao.nome}-${index}`} // Adicionando uma key única
-                onPress={() => openModal(competicao)}
-              >
-                <Text>{competicao.nome}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
+        <CompeticoesPorPaisComponent jogosPorPais={torneiosPorPais} />
       </ScrollView>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedCompetition?.nome}</Text>
-            {/* Coloque aqui a tabela da competição */}
-            <TouchableOpacity onPress={closeModal}>
-              <Text style={styles.closeButton}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  videoContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  modalContent: {
-    width: "90%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  closeButton: {
-    marginTop: 20,
-    color: "blue",
-    fontSize: 16,
+  video: {
+    width: "50%",
+    height: "50%",
   },
 });

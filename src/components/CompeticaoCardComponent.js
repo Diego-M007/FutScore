@@ -1,4 +1,3 @@
-// src/components/CompeticaoCardComponent.js
 import React, { useState } from "react";
 import {
   View,
@@ -16,15 +15,16 @@ export default function CompeticaoCardComponent({
   nome,
   quantidadeJogos,
   jogos,
+  finalizados,
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [heightAnim] = useState(new Animated.Value(60)); // Altura inicial do card
+  const [heightAnim] = useState(new Animated.Value(60));
 
   const toggleExpand = () => {
     setExpanded(!expanded);
 
     Animated.timing(heightAnim, {
-      toValue: expanded ? 60 : 70 + jogos.length * 0, // Ajuste a altura conforme necessário
+      toValue: expanded ? 60 : 70 + jogos.length * 0,
       duration: 200,
       easing: Easing.ease,
       useNativeDriver: false,
@@ -32,15 +32,15 @@ export default function CompeticaoCardComponent({
   };
 
   return (
-    <View style={styles.Container}>
+    <View style={styles.container}>
       <TouchableOpacity onPress={toggleExpand}>
         <Animated.View style={[styles.card, { height: heightAnim }]}>
           <Image source={{ uri: imagem }} style={styles.imagem} />
           <View style={styles.info}>
             <Text style={styles.nome}>{nome}</Text>
-            <Text
-              style={styles.quantidadeJogos}
-            >{`${quantidadeJogos} jogos`}</Text>
+            <Text style={styles.quantidadeJogos}>
+              {`${finalizados}  / ${quantidadeJogos} jogos`}
+            </Text>
           </View>
         </Animated.View>
       </TouchableOpacity>
@@ -50,7 +50,7 @@ export default function CompeticaoCardComponent({
 }
 
 const styles = StyleSheet.create({
-  Container: {
+  container: {
     width: "100%",
     marginVertical: 5,
   },
@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 10,
-    borderRadius: 10,
     resizeMode: "contain",
+    borderRadius: 10,
   },
   info: {
     flex: 1,
@@ -82,10 +82,10 @@ const styles = StyleSheet.create({
   nome: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "white",
+    color: "#fff",
   },
   quantidadeJogos: {
     fontSize: 14,
-    color: "white",
+    color: "#fff",
   },
 });
