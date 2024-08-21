@@ -100,7 +100,7 @@ export default function Partidas() {
           <Video
             style={styles.video}
             resizeMode={ResizeMode.CONTAIN} // Ajuste para CONTAIN ou COVER conforme necessário
-            source={require("../assets/Images/Video/Splash.mp4")}
+            source={require("../assets/Images/Video/loading.mp4")}
             shouldPlay
             isLooping={false}
             isMuted={true}

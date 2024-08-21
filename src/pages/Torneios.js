@@ -5,20 +5,20 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  Text,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
-import CompeticoesPorPaisComponent from "../components/CompetiçõesPorPaises";
 import HeaderComponent from "../components/HeaderComponent";
-import { stylesPartidas } from "../styles/StylePartidas";
-import { API_FOOTBALL_KEY } from "@env";
-import TxtComponent from "../components/TxtComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
 import { Video, ResizeMode } from "expo-av";
+import { stylesPartidas } from "../styles/StylePartidas";
+import { API_FOOTBALL_KEY } from "@env";
+import TorneioCardComponent from "../components/TorneioCardComponent";
 
 export default function Torneios() {
-  const [torneiosPorPais, setTorneiosPorPais] = useState({});
   const [loading, setLoading] = useState(true);
+  const [leagues, setLeagues] = useState([]);
   const timezone = "America/Sao_Paulo";
 
   useEffect(() => {
@@ -30,8 +30,7 @@ export default function Torneios() {
           "https://v3.football.api-sports.io/leagues",
           {
             params: {
-              date: today,
-              timezone: timezone,
+              season: new Date().getFullYear(),
             },
             headers: {
               "x-rapidapi-host": "v3.football.api-sports.io",
@@ -40,34 +39,15 @@ export default function Torneios() {
           }
         );
 
-        const paises = {};
+        console.log("Dados recebidos:", response.data); // Adiciona log para verificar os dados
 
-        response.data.response.forEach((torneio) => {
-          const pais = torneio.country.name;
-          const competicao = torneio.league.name;
-
-          if (!paises[pais]) {
-            paises[pais] = [];
-          }
-
-          let competicaoObj = paises[pais].find(
-            (comp) => comp.nome === competicao
-          );
-
-          if (!competicaoObj) {
-            competicaoObj = {
-              nome: competicao,
-              imagem: torneio.league.logo,
-              temporadaAtual: torneio.seasons.find((season) => season.current)
-                ?.year,
-            };
-            paises[pais].push(competicaoObj);
-          }
-        });
-
-        setTorneiosPorPais(paises);
+        if (response.data && response.data.response) {
+          setLeagues(response.data.response); // Armazena as ligas no estado
+        } else {
+          console.error("Estrutura inesperada de dados:", response.data);
+        }
       } catch (error) {
-        console.error("Erro ao buscar os torneios do dia:", error);
+        console.error("Erro ao buscar os torneios:", error);
       } finally {
         setLoading(false);
       }
@@ -81,14 +61,19 @@ export default function Torneios() {
       <SafeAreaView style={stylesPartidas.all}>
         <StatusBar barStyle="light-content" />
         <HeaderComponent />
+        <TorneioCardComponent
+          imagem="https://example.com/image.png"
+          nome="Premier League"
+        />
+
         <View style={styles.videoContainer}>
           <Video
             style={styles.video}
             resizeMode={ResizeMode.CONTAIN}
-            source={require("../assets/Images/Video/Splash.mp4")}
+            source={require("../assets/Images/Video/loading.mp4")}
             shouldPlay
-            isLooping={false}
-            isMuted={true}
+            isLooping
+            isMuted
             onError={(error) =>
               console.error("Erro ao carregar o vídeo:", error)
             }
@@ -103,12 +88,19 @@ export default function Torneios() {
       <StatusBar barStyle="light-content" />
       <HeaderComponent />
       <EspaçoPropaganda />
-      <TxtComponent
-        texto={"Torneios do Dia"}
-        styleTxt={stylesPartidas.TextoPrincipal}
-      />
       <ScrollView contentContainerStyle={stylesPartidas.Container}>
-        <CompeticoesPorPaisComponent jogosPorPais={torneiosPorPais} />
+        <View>
+          {leagues.length > 0 ? (
+            leagues.map((league) => (
+              <View key={league.league.id} style={styles.leagueContainer}>
+                <Text style={styles.leagueName}>{league.league.name}</Text>
+                <Text style={styles.countryName}>{league.country.name}</Text>
+              </View>
+            ))
+          ) : (
+            <Text>Nenhuma liga encontrada.</Text>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -121,7 +113,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   video: {
-    width: "50%",
-    height: "50%",
+    width: "100%",
+    height: "100%",
+  },
+  leagueContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  leagueName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  countryName: {
+    fontSize: 16,
+    color: "#666",
   },
 });
