@@ -2,12 +2,14 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
+  Image,
   TouchableOpacity,
   ScrollView,
   Modal,
   SafeAreaView,
   StatusBar,
   Button,
+  ImageBackground,
 } from "react-native";
 import TxtComponent from "../components/TxtComponent";
 import styles from "../styles/StylePerfil";
@@ -16,6 +18,7 @@ import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
 import HeaderComponent2 from "../components/HeaderComponent2";
+import Google from "../assets/Images/Video/";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -72,62 +75,77 @@ export default function Perfil({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <View style={styles.Container}>
       <HeaderComponent2 />
-      <View style={styles.headerContainer}>
-        <View style={styles.iconBackground}>
-          <Icon name="user" size={30} style={styles.icon} />
-        </View>
 
-        <TxtComponent
-          texto="Crie ou entre na sua conta para acompanhar times, ligas e jogadores favoritos"
-          styleTxt={styles.headerText}
-        />
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.buttonEntrar} onPress={handlePress}>
-          <TxtComponent texto="Entrar" styleTxt={styles.buttonText} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Modal */}
-      <Modal
-        transparent={true}
-        animationType="slide"
-        visible={modalVisible}
-        onRequestClose={closeModal}
+      <ImageBackground
+        source={require("../assets/Images/imagemfundoperfil.png")}
+        style={styles.imagemFundo}
+        resizeMode="Cover"
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-              <Icon name="cross" size={20} />
-            </TouchableOpacity>
-            <TxtComponent
-              texto="Escolha uma opção:"
-              styleTxt={styles.modalText}
-            />
-
-            {/* Botão de Login com Google */}
-            <SafeAreaView
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <StatusBar barStyle={"light-content"} />
-              <Button
-                title="Login com Google"
-                disabled={!request}
-                onPress={() => {
-                  promptAsync();
-                }}
-              />
-            </SafeAreaView>
+        <View style={styles.headerContainer}>
+          <View style={styles.iconBackground}>
+            <Icon name="user" size={60} style={styles.icon} />
           </View>
+
+          <TxtComponent
+            texto="Crie ou entre na sua conta para acompanhar times, ligas e jogadores favoritos"
+            styleTxt={styles.headerText}
+          />
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity style={styles.buttonEntrar} onPress={handlePress}>
+            <TxtComponent texto="Entrar" styleTxt={styles.buttonText} />
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </ScrollView>
+
+        {/* Modal */}
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={modalVisible}
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                <Icon name="cross" size={20} />
+              </TouchableOpacity>
+              <TxtComponent
+                texto="Entre no FutScore"
+                styleTxt={styles.modalText}
+              />
+              <TxtComponent
+                texto="Infinitas estatísticas"
+                styleTxt={styles.modalTextsub}
+              />
+
+              {/* Botão de Login com Google */}
+              <SafeAreaView
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <StatusBar barStyle={"light-content"} />
+                <Button
+                  title="Fazer login com Google"
+                  disabled={!request}
+                  onPress={() => {
+                    promptAsync();
+                  }}
+                />
+                <Image
+                  source={require("../assets/Images/New-Google-Logo.jpg")}
+                  style={styles.google}
+                />
+              </SafeAreaView>
+            </View>
+          </View>
+        </Modal>
+      </ImageBackground>
+    </View>
   );
 }

@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  FlatList,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -122,9 +123,19 @@ export default function Partidas() {
         texto={"Jogos do Dia"}
         styleTxt={stylesPartidas.TextoPrincipal}
       />
-      <ScrollView contentContainerStyle={stylesPartidas.Container}>
-        <CompeticoesPorPaisComponent jogosPorPais={jogosPorPais} />
-      </ScrollView>
+      <FlatList
+        data={[{ key: "header" }, ...Object.keys(jogosPorPais)]}
+        renderItem={({ item }) => {
+          if (item.key === "header") {
+            return <></>;
+          } else {
+            return (
+              <CompeticoesPorPaisComponent jogosPorPais={jogosPorPais[item]} />
+            );
+          }
+        }}
+        keyExtractor={(item, index) => index.toString()}
+      />
     </SafeAreaView>
   );
 }

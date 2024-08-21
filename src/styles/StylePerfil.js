@@ -1,17 +1,17 @@
 import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
-  scrollContainer: {
+  Container: {
     flexGrow: 1,
-    backgroundColor: "#2C2C2E",
-    padding: 20,
+    backgroundColor: "black",
   },
   headerContainer: {
-    width: "100%",
+    width: "80%",
     backgroundColor: "#3E3E42", // Adjusted to a darker gray to match the new background
     padding: 20,
     alignItems: "center",
     marginBottom: 20,
+    borderRadius: 10,
   },
   iconBackground: {
     backgroundColor: "#5A5A5E", // Adjusted to a slightly lighter gray to complement the header
@@ -22,7 +22,7 @@ export default StyleSheet.create({
     marginBottom: 10,
   },
   icon: {
-    color: "#D1D1D3", // Adjusted to a lighter gray for better contrast
+    color: "#D1D1D3",
   },
   headerText: {
     fontSize: 15,
@@ -50,17 +50,17 @@ export default StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-end",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "80%",
-    height: "50%",
-    backgroundColor: "#3E3E42", // Adjusted to match the header background
+    width: "100%",
+    height: "70%",
+    backgroundColor: "#3E3E42",
     borderRadius: 10,
     padding: 20,
-    alignItems: "center",
+
     justifyContent: "center",
   },
   closeButton: {
@@ -70,8 +70,20 @@ export default StyleSheet.create({
   },
   modalText: {
     fontSize: 18,
-    color: "#FFFFFF", // Changed to white for readability
+    color: "#FFFFFF",
     marginBottom: 20,
-    textAlign: "center",
+    textAlign: "left",
+  },
+  modalTextsub: {
+    fontSize: 12,
+    color: "#FFFFFF",
+    marginBottom: 20,
+    textAlign: "left",
+  },
+  imagemFundo: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    tintColor: "grey",
   },
 });

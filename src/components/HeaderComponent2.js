@@ -1,8 +1,9 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import ImgComponent from "./ImgComponent";
+import BotaoImagemComponent from "./BotãoImagemComponent";
 
-export default function HeaderComponent2() {
+export default function HeaderComponent() {
   return (
     <View style={styles.generalheader}>
       <View style={styles.DivLogo}>
@@ -11,6 +12,7 @@ export default function HeaderComponent2() {
           ImageStyle={styles.futscore}
         />
       </View>
+      <BotaoImagemComponent name={"search"} size={25} color={"white"} />
     </View>
   );
 }
@@ -19,7 +21,7 @@ const styles = StyleSheet.create({
   generalheader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center", // Centraliza o logo horizontalmente
+    justifyContent: "space-between",
     height: "8%", // Ajuste a altura conforme necessário
     width: "100%",
     backgroundColor: "#2C2C2E",
