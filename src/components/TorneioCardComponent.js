@@ -17,7 +17,7 @@ export default function TorneioCardComponent({ imagem, nome }) {
     setExpanded(!expanded);
 
     Animated.timing(heightAnim, {
-      toValue: expanded ? 60 : 100,
+      toValue: expanded ? 60 : 100, // Ajusta o valor de expansão
       duration: 200,
       easing: Easing.ease,
       useNativeDriver: false,
@@ -28,9 +28,11 @@ export default function TorneioCardComponent({ imagem, nome }) {
     <View style={styles.container}>
       <TouchableOpacity onPress={toggleExpand}>
         <Animated.View style={[styles.card, { height: heightAnim }]}>
-          <Image source={{ uri: imagem }} style={styles.imagem} />
-          <View style={styles.info}>
-            <Text style={styles.nome}>{nome}</Text>
+          <View style={styles.paisContainer}>
+            <View style={styles.paisHeader}>
+              <Image source={{ uri: imagem }} style={styles.imagem} />
+              <Text style={styles.paisTitulo}>{nome}</Text>
+            </View>
           </View>
         </Animated.View>
       </TouchableOpacity>
@@ -40,37 +42,33 @@ export default function TorneioCardComponent({ imagem, nome }) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    padding: 10,
     width: "100%",
-    marginVertical: 5,
   },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
+  paisContainer: {
+    marginBottom: 10,
+    width: "100%",
+    borderWidth: 0.5,
     borderColor: "#2f9fa6",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 10,
     backgroundColor: "#2C2C2E",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    overflow: "hidden",
+  },
+  paisHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  paisTitulo: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
+    color: "#fff",
   },
   imagem: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
+    width: 40, // Ajuste de largura para manter a proporção
+    height: 40, // Ajuste de altura para manter a proporção
     resizeMode: "contain",
-    borderRadius: 10,
-  },
-  info: {
-    flex: 1,
-  },
-  nome: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
+    borderRadius: 20,
   },
 });

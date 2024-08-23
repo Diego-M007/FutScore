@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const stylesPartidas = StyleSheet.create({
+export const stylesTorneios = StyleSheet.create({
   all: {
     backgroundColor: "#000000",
     flex: 1,
@@ -10,6 +10,28 @@ export const stylesPartidas = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 10,
+  },
+  videoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
+  leagueContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  leagueName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  countryName: {
+    fontSize: 16,
+    color: "#666",
   },
   TextoPrincipal: {
     color: "white",

@@ -7,8 +7,9 @@ export default function BotaoImagemComponent({
   name,
   size,
   color,
-  onPress,
+  setShowPicker,
   styleBtn,
+  onPress,
   texto,
   styletexto,
   fundo,
@@ -21,16 +22,13 @@ export default function BotaoImagemComponent({
         {
           alignItems: "center",
           justifyContent: "center",
+          width: 50,
+          height: "100%",
         },
       ]}
+      onPress={setShowPicker}
     >
-      <FontAwesome5
-        name={name}
-        size={size}
-        color={color}
-        onPress={onPress}
-        style={styleBtn}
-      />
+      <FontAwesome5 name={name} size={size} color={color} style={styleBtn} />
     </TouchableOpacity>
   );
 }

@@ -1,15 +1,13 @@
-// Perfil.js
 import React, { useState, useEffect } from "react";
 import {
   View,
   Image,
   TouchableOpacity,
-  ScrollView,
   Modal,
   SafeAreaView,
   StatusBar,
-  Button,
   ImageBackground,
+  TouchableWithoutFeedback,
 } from "react-native";
 import TxtComponent from "../components/TxtComponent";
 import styles from "../styles/StylePerfil";
@@ -18,12 +16,13 @@ import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
 import HeaderComponent2 from "../components/HeaderComponent2";
-import Google from "../assets/Images/Video/";
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithCredential,
 } from "firebase/auth";
+
+import { Video, ResizeMode } from "expo-av";
 
 export default function Perfil({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -107,43 +106,76 @@ export default function Perfil({ navigation }) {
           visible={modalVisible}
           onRequestClose={closeModal}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                <Icon name="cross" size={20} />
-              </TouchableOpacity>
-              <TxtComponent
-                texto="Entre no FutScore"
-                styleTxt={styles.modalText}
-              />
-              <TxtComponent
-                texto="Infinitas estatísticas"
-                styleTxt={styles.modalTextsub}
-              />
+          <TouchableWithoutFeedback onPress={closeModal}>
+            <View style={styles.modalContainer}>
+              <TouchableWithoutFeedback>
+                <View style={styles.modalContent}>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={closeModal}
+                  >
+                    <Icon name="cross" size={20} />
+                  </TouchableOpacity>
+                  <TxtComponent
+                    texto="Entre no FutScore"
+                    styleTxt={styles.modalText}
+                  />
+                  <TxtComponent
+                    texto="Acompanhe infinitas estatísticas, resultados ao vivo e em tempo real, classificações atualizadas e muito mais somente com FUTSCORE."
+                    styleTxt={styles.modalTextsub}
+                  />
 
-              {/* Botão de Login com Google */}
-              <SafeAreaView
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <StatusBar barStyle={"light-content"} />
-                <Button
-                  title="Fazer login com Google"
-                  disabled={!request}
-                  onPress={() => {
-                    promptAsync();
-                  }}
-                />
-                <Image
-                  source={require("../assets/Images/New-Google-Logo.jpg")}
-                  style={styles.google}
-                />
-              </SafeAreaView>
+                  <Video
+                    style={styles.video}
+                    resizeMode={ResizeMode.CONTAIN}
+                    source={require("../assets/Images/Video/videopropaganda.mp4")}
+                    shouldPlay
+                    isLooping={true}
+                    isMuted={true}
+                    onError={(error) =>
+                      console.error("Erro ao carregar o vídeo:", error)
+                    }
+                  />
+                  <SafeAreaView
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <StatusBar barStyle={"light-content"} />
+                    <TouchableOpacity
+                      disabled={!request}
+                      onPress={() => {
+                        promptAsync();
+                      }}
+                      style={styles.ButtonGoogle}
+                    >
+                      <Image
+                        source={require("../assets/Images/IconGoogle.png")}
+                        style={styles.LogoGoogle}
+                      />
+                      <TxtComponent
+                        texto={"Fazer login com Google"}
+                        styleTxt={styles.txtLogin}
+                      />
+                    </TouchableOpacity>
+                    <View style={styles.ViewFecharModal}>
+                      <TouchableOpacity
+                        style={styles.FecharModal}
+                        onPress={closeModal}
+                      >
+                        <TxtComponent
+                          texto={"Voltar"}
+                          styleTxt={styles.FecharModalTxt}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </SafeAreaView>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-          </View>
+          </TouchableWithoutFeedback>
         </Modal>
       </ImageBackground>
     </View>

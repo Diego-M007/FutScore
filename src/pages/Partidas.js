@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  FlatList,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -20,18 +19,19 @@ import { Video, ResizeMode } from "expo-av";
 export default function Partidas() {
   const [jogosPorPais, setJogosPorPais] = useState({});
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const timezone = "America/Sao_Paulo";
 
   useEffect(() => {
-    const fetchJogos = async () => {
+    const fetchJogos = async (date) => {
       try {
-        const today = moment().tz(timezone).format("YYYY-MM-DD");
+        const formattedDate = moment(date).tz(timezone).format("YYYY-MM-DD");
 
         const response = await axios.get(
           "https://v3.football.api-sports.io/fixtures",
           {
             params: {
-              date: today,
+              date: formattedDate,
               timezone: timezone,
             },
             headers: {
@@ -65,7 +65,7 @@ export default function Partidas() {
           }
 
           const jogoDate = moment(jogo.fixture.date).tz(timezone);
-          if (jogoDate.isSame(today, "day")) {
+          if (jogoDate.isSame(formattedDate, "day")) {
             competicaoObj.jogos.push({
               timeCasa: jogo.teams.home.name,
               logoCasa: jogo.teams.home.logo,
@@ -76,7 +76,7 @@ export default function Partidas() {
                 jogo.goals.home !== null && jogo.goals.away !== null
                   ? `${jogo.goals.home} - ${jogo.goals.away}`
                   : null,
-              fixtureId: jogo.fixture.id, // Adicione o fixtureId aqui
+              fixtureId: jogo.fixture.id,
             });
           }
         });
@@ -89,8 +89,8 @@ export default function Partidas() {
       }
     };
 
-    fetchJogos();
-  }, []);
+    fetchJogos(selectedDate);
+  }, [selectedDate]);
 
   if (loading) {
     return (
@@ -100,7 +100,7 @@ export default function Partidas() {
         <View style={styles.videoContainer}>
           <Video
             style={styles.video}
-            resizeMode={ResizeMode.CONTAIN} // Ajuste para CONTAIN ou COVER conforme necessário
+            resizeMode={ResizeMode.CONTAIN}
             source={require("../assets/Images/Video/loading.mp4")}
             shouldPlay
             isLooping={false}
@@ -117,25 +117,15 @@ export default function Partidas() {
   return (
     <SafeAreaView style={stylesPartidas.all}>
       <StatusBar barStyle="light-content" />
-      <HeaderComponent />
+      <HeaderComponent onDateChange={setSelectedDate} />
       <EspaçoPropaganda />
       <TxtComponent
         texto={"Jogos do Dia"}
         styleTxt={stylesPartidas.TextoPrincipal}
       />
-      <FlatList
-        data={[{ key: "header" }, ...Object.keys(jogosPorPais)]}
-        renderItem={({ item }) => {
-          if (item.key === "header") {
-            return <></>;
-          } else {
-            return (
-              <CompeticoesPorPaisComponent jogosPorPais={jogosPorPais[item]} />
-            );
-          }
-        }}
-        keyExtractor={(item, index) => index.toString()}
-      />
+      <ScrollView contentContainerStyle={stylesPartidas.Container}>
+        <CompeticoesPorPaisComponent jogosPorPais={jogosPorPais} />
+      </ScrollView>
     </SafeAreaView>
   );
 }

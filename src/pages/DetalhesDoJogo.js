@@ -120,14 +120,17 @@ export default function DetalhesDoJogo({ route }) {
       }
     };
 
-    fetchDetalhesDoJogo();
-    fetchOdds();
-    fetchPredictions();
-    fetchStatistics();
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchDetalhesDoJogo();
+      await fetchOdds();
+      await fetchPredictions();
+      await fetchStatistics();
+      await fetchHeadToHead();
+      setLoading(false);
+    };
 
-    if (jogo) fetchHeadToHead();
-
-    setLoading(false);
+    fetchData();
   }, [jogoId, jogo]);
 
   if (loading) {
@@ -238,30 +241,30 @@ export default function DetalhesDoJogo({ route }) {
           lineups.map((lineup, index) => (
             <View key={index} style={styles.lineup}>
               <Text>{lineup.team.name}</Text>
-              {lineup.startXI.map((player, index) => (
-                <Text key={index}>
-                  {player.player.name} - {player.player.position}
-                </Text>
+              {lineup.startXI.map((player) => (
+                <Text key={player.id}>{player.name}</Text>
               ))}
             </View>
           ))
         ) : (
-          <Text>Escalações não divulgadas.</Text>
+          <Text>Nenhuma escalação disponível.</Text>
         )}
       </View>
 
-      {/* Exibição de Odds */}
+      {/* Exibição de odds */}
       <View style={styles.oddsContainer}>
-        <Text style={styles.sectionTitle}>Odds - Pré-Jogo</Text>
-        {odds && odds.length > 0 ? (
+        <Text style={styles.sectionTitle}>Odds</Text>
+        {Array.isArray(odds) && odds.length > 0 ? (
           odds.map((odd, index) => (
-            <View key={index} style={styles.odds}>
-              {/* Verifique se odd.bookmaker e odd.odds estão definidos antes de acessar suas propriedades */}
-              {odd.bookmaker && odd.odds ? (
-                <Text>{`${odd.bookmaker.name}: ${odd.odds.home} - ${odd.odds.draw} - ${odd.odds.away}`}</Text>
-              ) : (
-                <Text>Odds indisponíveis.</Text>
-              )}
+            <View key={index} style={styles.odd}>
+              <Text>
+                {odd?.bookmaker
+                  ? `${odd.bookmaker}:`
+                  : "Bookmaker não disponível"}
+                {odd?.odds && odd.odds[0]?.value
+                  ? ` ${odd.odds[0].value}`
+                  : " Odds não disponíveis"}
+              </Text>
             </View>
           ))
         ) : (
@@ -269,36 +272,31 @@ export default function DetalhesDoJogo({ route }) {
         )}
       </View>
 
-      {/* Exibição de Predições */}
+      {/* Exibição de previsões */}
       <View style={styles.predictionsContainer}>
-        <Text style={styles.sectionTitle}>Predições</Text>
-        {predictions && predictions.length > 0 ? (
+        <Text style={styles.sectionTitle}>Previsões</Text>
+        {predictions ? (
           predictions.map((prediction, index) => (
             <View key={index} style={styles.prediction}>
-              {/* Verifique se prediction.forecast está definido antes de acessar suas propriedades */}
-              {prediction.forecast ? (
-                <Text>{`${prediction.forecast.name}: ${prediction.forecast.value}`}</Text>
-              ) : (
-                <Text>Previsão indisponível.</Text>
-              )}
+              <Text>{`${prediction.forecast}: ${prediction.value}`}</Text>
             </View>
           ))
         ) : (
-          <Text>Nenhuma predição disponível.</Text>
+          <Text>Nenhuma previsão disponível.</Text>
         )}
       </View>
 
-      {/* Exibição de Head-to-Head */}
+      {/* Exibição de confronto direto */}
       <View style={styles.headToHeadContainer}>
-        <Text style={styles.sectionTitle}>Últimos Jogos (Head-to-Head)</Text>
-        {headToHead && headToHead.length > 0 ? (
+        <Text style={styles.sectionTitle}>Confronto Direto</Text>
+        {headToHead ? (
           headToHead.map((match, index) => (
             <View key={index} style={styles.headToHeadMatch}>
-              <Text>{`${match.date}: ${match.teams.home.name} ${match.goals.home} - ${match.goals.away} ${match.teams.away.name}`}</Text>
+              <Text>{`${match.date} - ${match.teams.home.name} ${match.score.home} : ${match.score.away} ${match.teams.away.name}`}</Text>
             </View>
           ))
         ) : (
-          <Text>Nenhum jogo registrado.</Text>
+          <Text>Nenhuma informação de confronto direto disponível.</Text>
         )}
       </View>
     </ScrollView>
@@ -306,10 +304,6 @@ export default function DetalhesDoJogo({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -317,30 +311,24 @@ const styles = StyleSheet.create({
   },
   videoContainer: {
     width: "100%",
-    height: 200,
+    height: 300,
   },
   video: {
     width: "100%",
     height: "100%",
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
+  container: {
+    padding: 20,
   },
   infoContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   competition: {
     fontSize: 24,
     fontWeight: "bold",
   },
   date: {
-    fontSize: 16,
+    fontSize: 18,
   },
   venue: {
     fontSize: 16,
@@ -349,18 +337,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   roundContainer: {
-    marginBottom: 16,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginVertical: 8,
+    marginBottom: 10,
   },
   teamsContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   team: {
     alignItems: "center",
@@ -373,43 +361,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   vsText: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 24,
   },
   eventsContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   event: {
-    marginBottom: 4,
+    marginBottom: 5,
   },
   statisticsContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   stat: {
-    marginBottom: 4,
+    marginBottom: 5,
   },
   lineupsContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   lineup: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   oddsContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  odds: {
-    marginBottom: 4,
+  odd: {
+    marginBottom: 5,
   },
   predictionsContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   prediction: {
-    marginBottom: 4,
+    marginBottom: 5,
   },
   headToHeadContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   headToHeadMatch: {
-    marginBottom: 4,
+    marginBottom: 5,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
   },
 });

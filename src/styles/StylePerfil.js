@@ -69,13 +69,13 @@ export default StyleSheet.create({
     right: 10,
   },
   modalText: {
-    fontSize: 18,
+    fontSize: 25,
     color: "#FFFFFF",
     marginBottom: 20,
     textAlign: "left",
   },
   modalTextsub: {
-    fontSize: 12,
+    fontSize: 15,
     color: "#FFFFFF",
     marginBottom: 20,
     textAlign: "left",
@@ -85,5 +85,50 @@ export default StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     tintColor: "grey",
+    resizeMode: "cover",
+  },
+  ViewVideo: {
+    padding: 10,
+    alignItems: "center",
+  },
+  video: {
+    width: "100%", // Deixe o vídeo ocupar 100% da largura da tela
+    height: "40%", // Deixe o vídeo ocupar 100% da altura da tela
+  },
+  LogoGoogle: {
+    resizeMode: "contain",
+    width: 35,
+    height: 35,
+  },
+  txtLogin: {
+    fontSize: 17,
+    marginLeft: "3%",
+    color: "white",
+  },
+  ButtonGoogle: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#2f9fa6",
+    borderRadius: 5,
+    backgroundColor: "#2f9fa6",
+  },
+  ViewFecharModal: {
+    borderTopColor: "#2f9fa6",
+    borderTopWidth: 1,
+    width: "95%",
+    margin: "10%",
+  },
+  FecharModal: {
+    marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  FecharModalTxt: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 17,
   },
 });
