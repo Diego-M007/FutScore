@@ -2,6 +2,7 @@
   "expo": {
     "name": "FutScore",
     "slug": "FutScore",
+    "scheme": "FutScore",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/Images/LogoFutScore.png",

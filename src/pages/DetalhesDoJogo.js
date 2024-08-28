@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  ActivityIndicator,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
 import { API_FOOTBALL_KEY } from "@env";
@@ -15,8 +8,6 @@ import { Video, ResizeMode } from "expo-av";
 export default function DetalhesDoJogo({ route }) {
   const { jogoId } = route.params;
   const [jogo, setJogo] = useState(null);
-  const [odds, setOdds] = useState(null);
-  const [predictions, setPredictions] = useState(null);
   const [headToHead, setHeadToHead] = useState(null);
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,47 +25,12 @@ export default function DetalhesDoJogo({ route }) {
             },
           }
         );
+        console.log("Detalhes do Jogo:", response.data);
         if (response.data.response && response.data.response.length > 0) {
           setJogo(response.data.response[0]);
         }
       } catch (error) {
         console.error("Erro ao buscar detalhes do jogo:", error);
-      }
-    };
-
-    const fetchOdds = async () => {
-      try {
-        const response = await axios.get(
-          `https://v3.football.api-sports.io/odds`,
-          {
-            params: { fixture: jogoId },
-            headers: {
-              "x-rapidapi-key": API_FOOTBALL_KEY,
-              "x-rapidapi-host": "v3.football.api-sports.io",
-            },
-          }
-        );
-        setOdds(response.data.response);
-      } catch (error) {
-        console.error("Erro ao buscar odds:", error);
-      }
-    };
-
-    const fetchPredictions = async () => {
-      try {
-        const response = await axios.get(
-          `https://v3.football.api-sports.io/predictions`,
-          {
-            params: { fixture: jogoId },
-            headers: {
-              "x-rapidapi-key": API_FOOTBALL_KEY,
-              "x-rapidapi-host": "v3.football.api-sports.io",
-            },
-          }
-        );
-        setPredictions(response.data.response);
-      } catch (error) {
-        console.error("Erro ao buscar predictions:", error);
       }
     };
 
@@ -95,6 +51,7 @@ export default function DetalhesDoJogo({ route }) {
               },
             }
           );
+          console.log("Head to Head:", response.data);
           setHeadToHead(response.data.response);
         } catch (error) {
           console.error("Erro ao buscar head-to-head:", error);
@@ -114,6 +71,7 @@ export default function DetalhesDoJogo({ route }) {
             },
           }
         );
+        console.log("Statistics:", response.data);
         setStatistics(response.data.response);
       } catch (error) {
         console.error("Erro ao buscar estatísticas:", error);
@@ -123,8 +81,6 @@ export default function DetalhesDoJogo({ route }) {
     const fetchData = async () => {
       setLoading(true);
       await fetchDetalhesDoJogo();
-      await fetchOdds();
-      await fetchPredictions();
       await fetchStatistics();
       await fetchHeadToHead();
       setLoading(false);
@@ -251,52 +207,19 @@ export default function DetalhesDoJogo({ route }) {
         )}
       </View>
 
-      {/* Exibição de odds */}
-      <View style={styles.oddsContainer}>
-        <Text style={styles.sectionTitle}>Odds</Text>
-        {Array.isArray(odds) && odds.length > 0 ? (
-          odds.map((odd, index) => (
-            <View key={index} style={styles.odd}>
-              <Text>
-                {odd?.bookmaker
-                  ? `${odd.bookmaker}:`
-                  : "Bookmaker não disponível"}
-                {odd?.odds && odd.odds[0]?.value
-                  ? ` ${odd.odds[0].value}`
-                  : " Odds não disponíveis"}
-              </Text>
-            </View>
-          ))
-        ) : (
-          <Text>Nenhuma odd disponível.</Text>
-        )}
-      </View>
-
-      {/* Exibição de previsões */}
-      <View style={styles.predictionsContainer}>
-        <Text style={styles.sectionTitle}>Previsões</Text>
-        {predictions ? (
-          predictions.map((prediction, index) => (
-            <View key={index} style={styles.prediction}>
-              <Text>{`${prediction.forecast}: ${prediction.value}`}</Text>
-            </View>
-          ))
-        ) : (
-          <Text>Nenhuma previsão disponível.</Text>
-        )}
-      </View>
-
-      {/* Exibição de confronto direto */}
+      {/* Exibição de confrontos diretos */}
       <View style={styles.headToHeadContainer}>
-        <Text style={styles.sectionTitle}>Confronto Direto</Text>
-        {headToHead ? (
-          headToHead.map((match, index) => (
-            <View key={index} style={styles.headToHeadMatch}>
-              <Text>{`${match.date} - ${match.teams.home.name} ${match.score.home} : ${match.score.away} ${match.teams.away.name}`}</Text>
+        <Text style={styles.sectionTitle}>Confrontos Diretos</Text>
+        {headToHead &&
+        Array.isArray(headToHead.response) &&
+        headToHead.response.length > 0 ? (
+          headToHead.response.map((match, index) => (
+            <View key={index} style={styles.headToHead}>
+              <Text>{`${match.fixture.date} - ${match.teams.home.name} ${match.score.fulltime.home} x ${match.score.fulltime.away} ${match.teams.away.name}`}</Text>
             </View>
           ))
         ) : (
-          <Text>Nenhuma informação de confronto direto disponível.</Text>
+          <Text>Nenhum confronto direto disponível.</Text>
         )}
       </View>
     </ScrollView>
@@ -304,51 +227,60 @@ export default function DetalhesDoJogo({ route }) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "black",
   },
-  videoContainer: {
-    width: "100%",
-    height: 300,
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
   },
-  video: {
-    width: "100%",
-    height: "100%",
-  },
-  container: {
-    padding: 20,
+  errorText: {
+    fontSize: 18,
+    color: "red",
   },
   infoContainer: {
-    marginBottom: 20,
+    padding: 20,
+    alignItems: "center",
   },
   competition: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
   },
   date: {
     fontSize: 18,
+    color: "#666",
   },
   venue: {
-    fontSize: 16,
+    fontSize: 18,
+    color: "#666",
   },
   referee: {
-    fontSize: 16,
+    fontSize: 18,
+    color: "#666",
   },
   roundContainer: {
-    marginBottom: 10,
+    padding: 10,
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginVertical: 10,
   },
   teamsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     alignItems: "center",
-    marginBottom: 20,
+    paddingVertical: 20,
   },
   team: {
     alignItems: "center",
@@ -358,53 +290,54 @@ const styles = StyleSheet.create({
     height: 50,
   },
   teamName: {
-    fontSize: 16,
+    fontSize: 18,
+    marginTop: 5,
   },
   vsText: {
     fontSize: 24,
+    fontWeight: "bold",
   },
   eventsContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
   event: {
-    marginBottom: 5,
+    marginBottom: 10,
   },
   statisticsContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
   stat: {
-    marginBottom: 5,
+    marginBottom: 10,
   },
   lineupsContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
   lineup: {
     marginBottom: 10,
   },
   oddsContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
   odd: {
-    marginBottom: 5,
+    marginBottom: 10,
   },
   predictionsContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
   prediction: {
-    marginBottom: 5,
+    marginBottom: 10,
   },
   headToHeadContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
-  headToHeadMatch: {
-    marginBottom: 5,
+  headToHead: {
+    marginBottom: 10,
   },
-  errorContainer: {
+  videoContainer: {
+    width: 200,
+    height: 200,
+  },
+  video: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    color: "red",
   },
 });

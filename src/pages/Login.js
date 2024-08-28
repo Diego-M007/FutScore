@@ -10,30 +10,18 @@ import {
 } from "firebase/auth";
 
 export default function Login() {
-  const googleClientId =
-    "880894382932-3jovad1stn0bl0l21rj5pposmhur5q27.apps.googleusercontent.com";
+  const googleClientId = Constants.manifest.extra.googleClientId;
 
-  if (!googleClientId) {
-    console.log(
-      "Google Client ID: ",
-      Constants.manifest?.extra?.googleClientId
-    );
-    console.error(
-      "Google Client ID is missing. Please check your app.json configuration."
-    );
-    return null;
-  }
+  const redirectUri = makeRedirectUri({
+    useProxy: false, // Não usar proxy
+    scheme: "FutScore", // Substitua pelo seu esquema
+  });
 
-  // Defina o redirectUri manualmente
-  const redirectUri = "https://1euao1c-anonymous-8081.exp.direct";
-
-  // Configuração do request de autenticação com Google
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: googleClientId,
     redirectUri,
   });
 
-  // Efeito para gerenciar a resposta da autenticação
   useEffect(() => {
     if (response?.type === "success") {
       const { id_token } = response.params;
@@ -47,6 +35,8 @@ export default function Login() {
         .catch((error) => {
           console.error("Erro durante o login com Google: ", error);
         });
+    } else if (response?.type === "error") {
+      console.error("Erro durante o processo de login: ", response.error);
     }
   }, [response]);
 
@@ -59,7 +49,13 @@ export default function Login() {
         title="Login com Google"
         disabled={!request}
         onPress={() => {
-          promptAsync();
+          promptAsync()
+            .then((response) => {
+              console.log("Response:", response);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
         }}
       />
     </SafeAreaView>
