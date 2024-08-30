@@ -12,46 +12,40 @@ import {
 import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
 
-export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
+export default function TorneioCardComponent({ imagem, nome, ligaId }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [tabela, setTabela] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchTabela = async () => {
     setLoading(true);
-    console.log("ligaId:", ligaId); // Adicionando log para verificar ligaId
-    console.log("Tipo do torneio:", tipo); // Adicionando log para verificar tipo
-
     try {
-      const endpoint =
-        tipo === "liga"
-          ? "https://v3.football.api-sports.io/standings"
-          : "https://v3.football.api-sports.io/cup-standings"; // Altere o endpoint se necessário
+      const response = await axios.get(
+        `https://v3.football.api-sports.io/standings`,
+        {
+          params: {
+            season: new Date().getFullYear(),
+            league: ligaId,
+          },
+          headers: {
+            "x-rapidapi-host": "v3.football.api-sports.io",
+            "x-rapidapi-key": API_FOOTBALL_KEY,
+          },
+        }
+      );
 
-      const response = await axios.get(endpoint, {
-        params: {
-          season: new Date().getFullYear(),
-          league: ligaId,
-        },
-        headers: {
-          "x-rapidapi-host": "v3.football.api-sports.io",
-          "x-rapidapi-key": API_FOOTBALL_KEY,
-        },
-      });
-
-      console.log("Resposta da API:", response.data); // Adicionando log para verificar a resposta
-
+      // Verificação adicional para evitar erros
       if (
         response.data &&
         response.data.response &&
         response.data.response.length > 0
       ) {
-        const tournamentData = response.data.response[0];
-        if (tournamentData.league && tournamentData.league.standings) {
-          const standings = tournamentData.league.standings[0];
+        const leagueData = response.data.response[0];
+        if (leagueData.league && leagueData.league.standings) {
+          const standings = leagueData.league.standings[0];
           setTabela(standings);
         } else {
-          console.error("Dados do torneio não disponíveis.");
+          console.error("Dados da liga não disponíveis.");
         }
       } else {
         console.error("Resposta inesperada da API.");
