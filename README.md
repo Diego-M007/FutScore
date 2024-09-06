@@ -4,7 +4,7 @@
 
 # **Tutorial de Instalação do FutScore**
 
-Este tutorial é voltado para usuários que desejam instalar e rodar o aplicativo **FutScore** diretamente a partir do código fonte, sem a necessidade de configurar o Firebase ou gerar um APK. O banco de dados já está configurado e rodando.
+Este tutorial é voltado para usuários que desejam instalar e rodar o aplicativo **FutScore** diretamente a partir do código fonte.
 
 ## **Pré-requisitos**
 
