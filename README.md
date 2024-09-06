@@ -67,9 +67,9 @@ Caso encontre problemas durante a instalação ou execução do aplicativo, veri
 
 # **Manual do Usuário - FutScore**
 
-## **Introdução**
+## **Bem-vindo Ao Melhor App de Futebol do Planeta**
 
-Bem-vindo ao **FutScore**! Este aplicativo foi criado para que você possa acompanhar de perto as partidas, torneios e as estatísticas detalhadas de seus times e jogadores favoritos em tempo real. Este manual vai te guiar através de cada página do aplicativo para que você possa aproveitar ao máximo todas as funcionalidades oferecidas com exclusividade focada no futebol.
+Você está no **FutScore**! Este aplicativo foi criado para que você possa acompanhar de perto as partidas, torneios e as estatísticas detalhadas de seus times e jogadores favoritos em tempo real. Este manual vai te guiar através de cada página do aplicativo para que você possa aproveitar ao máximo todas as funcionalidades oferecidas com exclusividade focada no **Futebol.**
 
 ## **Página Inicial - Partidas**
 
