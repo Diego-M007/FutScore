@@ -68,6 +68,7 @@ export default function Routes() {
         component={Login}
         options={{
           headerShown: false,
+          tabBarButton: () => null,
         }}
       />
       <Tab.Screen

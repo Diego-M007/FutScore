@@ -41,12 +41,11 @@ export default function DetalhesDoJogo({ route }) {
       } catch (error) {
         console.error("Erro ao buscar detalhes do jogo:", error);
       } finally {
-        setLoading(false); // Mover para o final
+        setLoading(false);
       }
     };
 
     fetchDetalhesDoJogo();
-    setLoading(false);
   }, [jogoId]);
 
   if (loading) {
