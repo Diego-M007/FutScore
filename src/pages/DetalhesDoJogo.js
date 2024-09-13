@@ -7,11 +7,13 @@ import {
   ScrollView,
   Button,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
 import { API_FOOTBALL_KEY } from "@env";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -21,6 +23,7 @@ export default function DetalhesDoJogo({ route }) {
   const [loading, setLoading] = useState(true);
   const [showHomeTeam, setShowHomeTeam] = useState(true);
   const [opcaoSelecionada, setOpcaoSelecionada] = useState("Estatisticas");
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchDetalhesDoJogo = async () => {
@@ -66,7 +69,7 @@ export default function DetalhesDoJogo({ route }) {
     );
   }
 
-  const { teams, fixture, lineups, statistics, events } = jogo;
+  const { teams, fixture, lineups, statistics, events, goals } = jogo;
 
   const dataHoraJogo = moment
     .tz(fixture.date, "America/Sao_Paulo")
@@ -79,6 +82,8 @@ export default function DetalhesDoJogo({ route }) {
     const porcentagemB = (valorB / total) * 100;
     return [porcentagemA, porcentagemB];
   };
+
+  const jogoEncerrado = fixture.status.short === "FT";
 
   const renderEventIcon = (event) => {
     switch (event.type) {
@@ -173,6 +178,13 @@ export default function DetalhesDoJogo({ route }) {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <MaterialIcons name="arrow-back" size={24} color="white" />
+      </TouchableOpacity>
+
       <View style={styles.infoContainer}>
         <Text style={styles.date}>{dataHoraJogo}</Text>
       </View>
@@ -181,9 +193,22 @@ export default function DetalhesDoJogo({ route }) {
         <View style={styles.team}>
           <Image source={{ uri: teams.home.logo }} style={styles.logo} />
           <Text style={styles.teamName}>{teams.home.name}</Text>
+          {/* Placar time da casa */}
         </View>
-        <Text style={styles.vsText}>VS</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.teamScore}>{goals.home}</Text>
+          <Text style={styles.vsText}>VS</Text>
+          <Text style={styles.teamScore}>{goals.away}</Text>
+        </View>
         <View style={styles.team}>
+          {/* Placar time visitante */}
+
           <Image source={{ uri: teams.away.logo }} style={styles.logo} />
           <Text style={styles.teamName}>{teams.away.name}</Text>
         </View>
@@ -199,17 +224,17 @@ export default function DetalhesDoJogo({ route }) {
         <Button
           title="Estatísticas"
           onPress={() => setOpcaoSelecionada("Estatisticas")}
-          color={opcaoSelecionada === "Estatisticas" ? "#f4511e" : "#000"}
+          color={opcaoSelecionada === "Estatisticas" ? "#2f9fa6" : "#000"}
         />
         <Button
           title="Eventos"
           onPress={() => setOpcaoSelecionada("Eventos")}
-          color={opcaoSelecionada === "Eventos" ? "#f4511e" : "#000"}
+          color={opcaoSelecionada === "Eventos" ? "#2f9fa6" : "#000"}
         />
         <Button
           title="Escalações"
           onPress={() => setOpcaoSelecionada("Escalacoes")}
-          color={opcaoSelecionada === "Escalacoes" ? "#f4511e" : "#000"}
+          color={opcaoSelecionada === "Escalacoes" ? "#2f9fa6" : "#000"}
         />
       </View>
       {opcaoSelecionada === "Estatisticas" && (
@@ -227,9 +252,35 @@ export default function DetalhesDoJogo({ route }) {
                   parseInt(statistics[1].statistics[index].value) || 0;
                 const [porcentagemCasa, porcentagemVisitante] =
                   calcularPorcentagem(valorTimeCasa, valorTimeVisitante);
+
+                // Tradução das estatísticas
+                const traduzirEstatistica = (tipo) => {
+                  switch (tipo) {
+                    case "Shots on Goal":
+                      return "Chutes no Gol";
+                    case "Shots off Goal":
+                      return "Chutes Fora";
+                    case "Total Shots":
+                      return "Chutes Totais";
+                    case "Ball Possession":
+                      return "Posse de Bola";
+                    case "Corner Kicks":
+                      return "Escanteios";
+                    case "Offsides":
+                      return "Impedimentos";
+                    case "Fouls":
+                      return "Faltas";
+                    default:
+                      return tipo;
+                  }
+                };
                 return (
                   <View key={index} style={styles.statsRowContent}>
-                    <Text style={styles.statsText}>{valorTimeCasa}</Text>
+                    <Text style={styles.statsText}>
+                      {traduzirEstatistica(stat.type) === "Posse de Bola"
+                        ? `${valorTimeCasa}%`
+                        : valorTimeCasa}
+                    </Text>
                     <View style={styles.ContainerStats}>
                       <Text style={styles.statsText}>{stat.type}</Text>
                       <View style={styles.progressBarContainer}>
@@ -253,7 +304,11 @@ export default function DetalhesDoJogo({ route }) {
                         />
                       </View>
                     </View>
-                    <Text style={styles.statsText}>{valorTimeVisitante}</Text>
+                    <Text style={styles.statsText}>
+                      {traduzirEstatistica(stat.type) === "Posse de Bola"
+                        ? `${valorTimeVisitante}%`
+                        : valorTimeVisitante}
+                    </Text>
                   </View>
                 );
               })}
@@ -352,6 +407,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "black", // cor de fundo escura
   },
+  backButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    zIndex: 10,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -380,9 +441,9 @@ const styles = StyleSheet.create({
   },
   teamsContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20,
+    marginVertical: 20,
   },
   team: {
     alignItems: "center",
@@ -390,18 +451,24 @@ const styles = StyleSheet.create({
   logo: {
     width: 50,
     height: 50,
+    resizeMode: "contain",
   },
   teamName: {
     fontSize: 18,
-    marginTop: 5,
     fontWeight: "bold",
-    textAlign: "center",
-    color: "white", // texto do nome da equipe em branco
+    color: "white",
   },
   vsText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "white", // "VS" em branco
+    marginHorizontal: 10,
+    color: "white",
+  },
+  teamScore: {
+    fontSize: 45,
+    fontWeight: "bold",
+    marginHorizontal: "4%",
+    color: "white",
   },
   extraInfoContainer: {
     padding: 20,
