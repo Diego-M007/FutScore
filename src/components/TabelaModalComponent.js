@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
 
-export default function TorneioCardComponent({ imagem, nome, ligaId }) {
+export default function TabelaModalComponent({ imagem, nome, ligaId }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [tabela, setTabela] = useState([]);
   const [loading, setLoading] = useState(false);
