@@ -19,8 +19,7 @@ import TxtComponent from "../components/TxtComponent";
 
 export default function Torneios() {
   const [loading, setLoading] = useState(true);
-  const [leagues, setLeagues] = useState([]);
-  const [cups, setCups] = useState([]);
+  const [torneios, setTorneios] = useState([]);
   const timezone = "America/Sao_Paulo";
 
   useEffect(() => {
@@ -28,8 +27,8 @@ export default function Torneios() {
       try {
         const today = moment().tz(timezone).format("YYYY-MM-DD");
 
-        // Fetch Ligas
-        const leaguesResponse = await axios.get(
+        // Fetch Ligas e Copas
+        const response = await axios.get(
           "https://v3.football.api-sports.io/leagues",
           {
             params: {
@@ -42,50 +41,20 @@ export default function Torneios() {
           }
         );
 
-        // Fetch Copas
-        const cupsResponse = await axios.get(
-          "https://v3.football.api-sports.io/cups", // Supondo que este seja o endpoint correto
-          {
-            params: {
-              season: new Date().getFullYear(),
-            },
-            headers: {
-              "x-rapidapi-host": "v3.football.api-sports.io",
-              "x-rapidapi-key": API_FOOTBALL_KEY,
-            },
-          }
-        );
+        let allTorneios = [];
 
-        console.log("Dados das ligas recebidos:", leaguesResponse.data);
-        console.log("Dados das copas recebidos:", cupsResponse.data);
-
-        if (leaguesResponse.data && leaguesResponse.data.response) {
-          const sortedLeagues = leaguesResponse.data.response.sort((a, b) => {
-            if (a.league.name < b.league.name) return -1;
-            if (a.league.name > b.league.name) return 1;
-            return 0;
-          });
-          setLeagues(sortedLeagues);
-        } else {
-          console.error(
-            "Estrutura inesperada de dados das ligas:",
-            leaguesResponse.data
-          );
+        if (response.data && response.data.response) {
+          allTorneios = response.data.response.map((league) => ({
+            id: league.league.id,
+            name: league.league.name,
+            logo: league.league.logo,
+            type: league.league.type, // Pode ser "cup" ou "league"
+          }));
         }
 
-        if (cupsResponse.data && cupsResponse.data.response) {
-          const sortedCups = cupsResponse.data.response.sort((a, b) => {
-            if (a.cup.name < b.cup.name) return -1;
-            if (a.cup.name > b.cup.name) return 1;
-            return 0;
-          });
-          setCups(sortedCups);
-        } else {
-          console.error(
-            "Estrutura inesperada de dados das copas:",
-            cupsResponse.data
-          );
-        }
+        allTorneios.sort((a, b) => (a.name < b.name ? -1 : 1));
+
+        setTorneios(allTorneios);
       } catch (error) {
         console.error(
           "Erro ao buscar os torneios:",
@@ -130,42 +99,22 @@ export default function Torneios() {
       <ScrollView contentContainerStyle={stylesPartidas.Container}>
         <View>
           <TxtComponent
-            texto={"Todas as Ligas"}
+            texto={"Todos os Torneios"}
             styleTxt={stylesPartidas.TextoPrincipal}
           />
-          {leagues.length > 0 ? (
-            leagues.map((league) => (
+          {torneios.length > 0 ? (
+            torneios.map((torneio) => (
               <TorneioCardComponent
-                key={league.league.id}
-                imagem={league.league.logo}
-                nome={league.league.name}
-                ligaId={league.league.id}
-                tipo="liga"
+                key={torneio.id}
+                imagem={torneio.logo}
+                nome={torneio.name}
+                ligaId={torneio.id}
+                tipo={torneio.type}
               />
             ))
           ) : (
             <Text style={stylesPartidas.noDataText}>
-              Nenhuma liga disponível.
-            </Text>
-          )}
-
-          <TxtComponent
-            texto={"Todas as Copas"}
-            styleTxt={stylesPartidas.TextoPrincipal}
-          />
-          {cups.length > 0 ? (
-            cups.map((cup) => (
-              <TorneioCardComponent
-                key={cup.cup.id}
-                imagem={cup.cup.logo}
-                nome={cup.cup.name}
-                ligaId={cup.cup.id}
-                tipo="copa"
-              />
-            ))
-          ) : (
-            <Text style={stylesPartidas.noDataText}>
-              Nenhuma copa disponível.
+              Nenhum torneio disponível.
             </Text>
           )}
         </View>

@@ -13,7 +13,7 @@ export const stylesPartidas = StyleSheet.create({
   },
   TextoPrincipal: {
     color: "white",
-    fontSize: 24,
+    fontSize: 17,
     fontWeight: "bold",
     textAlign: "center",
     marginTop: 15,

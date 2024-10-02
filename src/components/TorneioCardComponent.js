@@ -19,14 +19,12 @@ export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
 
   const fetchTabela = async () => {
     setLoading(true);
-    console.log("ligaId:", ligaId); // Adicionando log para verificar ligaId
-    console.log("Tipo do torneio:", tipo); // Adicionando log para verificar tipo
 
     try {
       const endpoint =
         tipo === "liga"
           ? "https://v3.football.api-sports.io/standings"
-          : "https://v3.football.api-sports.io/cup-standings"; // Altere o endpoint se necessário
+          : "https://v3.football.api-sports.io/standings"; // Mesmo endpoint para copas com grupos
 
       const response = await axios.get(endpoint, {
         params: {
@@ -39,17 +37,10 @@ export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
         },
       });
 
-      console.log("Resposta da API:", response.data); // Adicionando log para verificar a resposta
-
-      if (
-        response.data &&
-        response.data.response &&
-        response.data.response.length > 0
-      ) {
+      if (response.data && response.data.response.length > 0) {
         const tournamentData = response.data.response[0];
         if (tournamentData.league && tournamentData.league.standings) {
-          const standings = tournamentData.league.standings[0];
-          setTabela(standings);
+          setTabela(tournamentData.league.standings);
         } else {
           console.error("Dados do torneio não disponíveis.");
         }
@@ -88,15 +79,20 @@ export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
           ) : (
             <ScrollView contentContainerStyle={styles.scrollContainer}>
               {tabela.length > 0 ? (
-                tabela.map((team, index) => (
-                  <View key={team.team.id} style={styles.teamContainer}>
-                    <Text style={styles.teamPosition}>{index + 1}</Text>
-                    <Image
-                      source={{ uri: team.team.logo }}
-                      style={styles.teamLogo}
-                    />
-                    <Text style={styles.teamName}>{team.team.name}</Text>
-                    <Text style={styles.teamPoints}>{team.points} pts</Text>
+                tabela.map((group, groupIndex) => (
+                  <View key={groupIndex} style={styles.groupContainer}>
+                    <Text style={styles.groupName}>Grupo {groupIndex + 1}</Text>
+                    {group.map((team, index) => (
+                      <View key={team.team.id} style={styles.teamContainer}>
+                        <Text style={styles.teamPosition}>{index + 1}</Text>
+                        <Image
+                          source={{ uri: team.team.logo }}
+                          style={styles.teamLogo}
+                        />
+                        <Text style={styles.teamName}>{team.team.name}</Text>
+                        <Text style={styles.teamPoints}>{team.points} pts</Text>
+                      </View>
+                    ))}
                   </View>
                 ))
               ) : (
@@ -148,6 +144,15 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingBottom: 20,
+  },
+  groupContainer: {
+    marginVertical: 20,
+  },
+  groupName: {
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   teamContainer: {
     flexDirection: "row",

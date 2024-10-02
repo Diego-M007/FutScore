@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Platform, Button, Text } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ImgComponent from "./ImgComponent";
 import BotaoImagemComponent from "./BotãoImagemComponent";
-import { TouchableOpacity } from "react-native";
 
 export default function HeaderComponent({ onDateChange }) {
   const [showPicker, setShowPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Estado para armazenar a data selecionada
 
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || new Date();
-    setShowPicker(Platform.OS === "ios");
-    onDateChange(currentDate);
+  const handleDateChange = (event, newSelectedDate) => {
+    const currentDate = newSelectedDate || selectedDate; // Usa a data atual ou a data selecionada
+    setShowPicker(Platform.OS === "ios"); // Fecha o picker no Android
+    setSelectedDate(currentDate); // Atualiza a data selecionada localmente
+    onDateChange(currentDate); // Passa a nova data para o componente pai
   };
 
   return (
@@ -20,7 +21,7 @@ export default function HeaderComponent({ onDateChange }) {
         name={"calendar-alt"}
         size={25}
         color={"white"}
-        setShowPicker={() => setShowPicker(true)}
+        setShowPicker={() => setShowPicker(true)} // Abre o picker quando o botão de calendário é clicado
       />
 
       <View style={styles.DivLogo}>
@@ -33,10 +34,10 @@ export default function HeaderComponent({ onDateChange }) {
 
       {showPicker && (
         <DateTimePicker
-          value={new Date()}
+          value={selectedDate} // Inicializa o picker com a data selecionada
           mode="date"
           display="calendar"
-          onChange={handleDateChange}
+          onChange={handleDateChange} // Atualiza a data ao selecionar uma nova
         />
       )}
     </View>

@@ -16,6 +16,7 @@ export default function CompeticaoCardComponent({
   quantidadeJogos,
   jogos,
   finalizados,
+  isUEFA,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [heightAnim] = useState(new Animated.Value(60));
@@ -37,9 +38,9 @@ export default function CompeticaoCardComponent({
         <Animated.View style={[styles.card, { height: heightAnim }]}>
           <Image source={{ uri: imagem }} style={styles.imagem} />
           <View style={styles.info}>
-            <Text style={styles.nome}>{nome}</Text>
+            <Text style={styles.nome}>{isUEFA ? "UEFA" : nome}</Text>
             <Text style={styles.quantidadeJogos}>
-              {`${finalizados}  / ${quantidadeJogos} jogos`}
+              {`${finalizados} / ${quantidadeJogos} jogos`}
             </Text>
           </View>
         </Animated.View>
