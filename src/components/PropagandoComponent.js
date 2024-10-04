@@ -1,22 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Modal, StyleSheet } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import {
+  View,
+  Modal,
+  StyleSheet,
+  Image,
+  TouchableWithoutFeedback,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const propagandaExemplo = [
-  "Promoção imperdível: 50% OFF!",
-  "Novos produtos disponíveis!",
-  "Visite nossa loja para mais ofertas!",
-  "Compre 1, leve 2!",
+  {
+    id: 1,
+    url: "https://i.ibb.co/gMr71yN/cardad.png",
+  },
+  {
+    id: 2,
+    url: "https://i.ibb.co/gMr71yN/cardad.png",
+  },
 ];
 
-export default function EspaçoPropaganda() {
+export default function EspacoPropaganda() {
   const [visible, setVisible] = useState(true);
-  const [canClose, setCanClose] = useState(false); // Estado para controlar se pode fechar
-  const [timeLeft, setTimeLeft] = useState(1); // Tempo restante para fechar
   const [currentAd, setCurrentAd] = useState(propagandaExemplo[0]);
+  const [countdown, setCountdown] = useState(1); // Estado para o contador de 5 segundos
+  const [canClose, setCanClose] = useState(false); // Controle de permissão para fechar
 
   useEffect(() => {
-    // Muda o anúncio a cada 5 segundos
+    // Intervalo para trocar o anúncio a cada 5 segundos
     const adInterval = setInterval(() => {
       setCurrentAd((prevAd) => {
         const nextAdIndex =
@@ -25,25 +37,23 @@ export default function EspaçoPropaganda() {
       });
     }, 5000);
 
-    // Inicia o contador para fechar o anúncio
-    const countdown = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime > 1) {
-          return prevTime - 1;
-        } else {
-          setCanClose(true); // Habilita o botão de fechar
-          clearInterval(countdown); // Para o contador quando chegar a 0
-          return 0;
-        }
-      });
-    }, 1000); // Decrementa a cada 1 segundo
-
-    // Limpa os intervalos quando o componente for desmontado
     return () => {
       clearInterval(adInterval);
-      clearInterval(countdown);
     };
   }, []);
+
+  useEffect(() => {
+    // Contagem regressiva de 5 segundos
+    if (countdown > 0) {
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+
+      return () => clearInterval(countdownInterval);
+    } else {
+      setCanClose(true); // Permitir fechar o anúncio quando o contador chegar a 0
+    }
+  }, [countdown]);
 
   const handleClose = () => {
     if (canClose) {
@@ -58,25 +68,30 @@ export default function EspaçoPropaganda() {
       transparent={true}
       onRequestClose={handleClose}
     >
-      <View style={styles.modalBackground}>
-        {/* Temporizador acima do modal */}
-        <Text style={styles.countdownText}>
-          {canClose ? "" : `Fechar em ${timeLeft} segundos`}
-        </Text>
-
-        <View style={styles.modalContainer}>
-          {/* Ícone de fechar na parte superior */}
-          <AntDesign
-            style={styles.adIcon}
-            name="closecircleo"
-            size={24}
-            color="white"
-            onPress={handleClose}
-            disabled={!canClose}
-          />
-          <Text style={styles.adText}>{currentAd}</Text>
+      <TouchableWithoutFeedback onPress={handleClose}>
+        <View style={styles.modalBackground}>
+          <TouchableWithoutFeedback>
+            <Image
+              source={{ uri: currentAd.url }}
+              style={styles.adImage}
+              resizeMode="contain" // Para garantir que a imagem caiba dentro do espaço
+            />
+          </TouchableWithoutFeedback>
+          {/* Contador e botão de fechar */}
+          <View style={styles.header}>
+            {canClose ? (
+              <TouchableOpacity
+                onPress={handleClose}
+                style={styles.closeButton}
+              >
+                <Icon name="times" size={24} color="white" />
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.countdownText}>Fechar em {countdown}s</Text>
+            )}
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
@@ -86,29 +101,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)", // Fundo transparente escurecido
   },
-  modalContainer: {
-    width: "80%",
-    padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
+  adImage: {
+    width: 700, // Largura específica para a imagem
+    height: 400, // Altura específica para a imagem
+  },
+  header: {
+    position: "absolute",
+    top: 150,
+    right: 30,
+    justifyContent: "center",
     alignItems: "center",
   },
-  adText: {
+  countdownText: {
     fontSize: 16,
+    color: "white",
     marginBottom: 10,
   },
-  adIcon: {
-    position: "absolute",
-    top: -40, // Posiciona o botão acima do modal
-    right: -10,
-  },
-  countdownText: {
-    position: "absolute",
-    top: 350, // Posição acima do modal
-    fontSize: 14,
-    color: "white",
-    textAlign: "center",
+  closeButton: {
+    top: 30,
   },
 });

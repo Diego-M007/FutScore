@@ -22,17 +22,26 @@ export default function Torneios() {
   const [torneios, setTorneios] = useState([]);
   const timezone = "America/Sao_Paulo";
 
+  // Lista de melhores ligas que queremos exibir primeiro com o país para garantir a precisão
+  const melhoresLigas = [
+    { name: "Premier League", country: "England" },
+    { name: "La Liga", country: "Spain" },
+    { name: "Serie A", country: "Italy" },
+    { name: "Bundesliga", country: "Germany" },
+    { name: "Ligue 1", country: "France" },
+    { name: "Serie A", country: "Brazil" },
+  ];
+
   useEffect(() => {
     const fetchTorneios = async () => {
       try {
         const today = moment().tz(timezone).format("YYYY-MM-DD");
 
-        // Fetch Ligas e Copas
         const response = await axios.get(
           "https://v3.football.api-sports.io/leagues",
           {
             params: {
-              season: new Date().getFullYear(),
+              season: new Date().getFullYear(), // Pega o ano atual
             },
             headers: {
               "x-rapidapi-host": "v3.football.api-sports.io",
@@ -41,26 +50,48 @@ export default function Torneios() {
           }
         );
 
-        let allTorneios = [];
-
         if (response.data && response.data.response) {
-          allTorneios = response.data.response.map((league) => ({
-            id: league.league.id,
-            name: league.league.name,
-            logo: league.league.logo,
-            type: league.league.type, // Pode ser "cup" ou "league"
-          }));
+          // Filtrar apenas ligas (excluir copas)
+          let ligas = response.data.response.filter(
+            (league) => league.league && league.league.type === "League"
+          );
+
+          // Separar as melhores ligas e ordenar as demais alfabeticamente
+          const melhores = ligas.filter((liga) =>
+            melhoresLigas.some(
+              (ml) =>
+                ml.name === liga.league.name && ml.country === liga.country.name
+            )
+          );
+
+          const outrasLigas = ligas
+            .filter(
+              (liga) =>
+                !melhoresLigas.some(
+                  (ml) =>
+                    ml.name === liga.league.name &&
+                    ml.country === liga.country.name
+                )
+            )
+            .sort((a, b) => a.league.name.localeCompare(b.league.name));
+
+          // Ordenar as melhores ligas na ordem definida no array "melhoresLigas"
+          const melhoresOrdenadas = melhoresLigas
+            .map((ml) =>
+              melhores.find(
+                (liga) =>
+                  liga.league.name === ml.name &&
+                  liga.country.name === ml.country
+              )
+            )
+            .filter(Boolean);
+
+          const ligasOrdenadas = [...melhoresOrdenadas, ...outrasLigas];
+
+          setTorneios(ligasOrdenadas);
         }
-
-        allTorneios.sort((a, b) => (a.name < b.name ? -1 : 1));
-
-        setTorneios(allTorneios);
       } catch (error) {
-        console.error(
-          "Erro ao buscar os torneios:",
-          error.message,
-          error.response?.data
-        );
+        console.error("Erro ao buscar ligas:", error);
       } finally {
         setLoading(false);
       }
@@ -82,9 +113,6 @@ export default function Torneios() {
             shouldPlay
             isLooping
             isMuted
-            onError={(error) =>
-              console.error("Erro ao carregar o vídeo:", error)
-            }
           />
         </View>
       </SafeAreaView>
@@ -99,22 +127,21 @@ export default function Torneios() {
       <ScrollView contentContainerStyle={stylesPartidas.Container}>
         <View>
           <TxtComponent
-            texto={"Todos os Torneios"}
+            texto={"Todas as Ligas"}
             styleTxt={stylesPartidas.TextoPrincipal}
           />
           {torneios.length > 0 ? (
             torneios.map((torneio) => (
               <TorneioCardComponent
-                key={torneio.id}
-                imagem={torneio.logo}
-                nome={torneio.name}
-                ligaId={torneio.id}
-                tipo={torneio.type}
+                key={torneio.league.id}
+                imagem={torneio.league.logo}
+                nome={torneio.league.name}
+                ligaId={torneio.league.id}
               />
             ))
           ) : (
             <Text style={stylesPartidas.noDataText}>
-              Nenhum torneio disponível.
+              Nenhuma liga disponível.
             </Text>
           )}
         </View>
