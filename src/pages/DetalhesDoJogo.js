@@ -8,6 +8,7 @@ import {
   Button,
   Dimensions,
   TouchableOpacity,
+  ImageBackground,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -185,41 +186,48 @@ export default function DetalhesDoJogo({ route }) {
         <MaterialIcons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.date}>{dataHoraJogo}</Text>
-      </View>
-
-      <View style={styles.teamsContainer}>
-        <View style={styles.team}>
-          <Image source={{ uri: teams.home.logo }} style={styles.logo} />
-          <Text style={styles.teamName}>{teams.home.name}</Text>
-          {/* Placar time da casa */}
+      <ImageBackground
+        source={require("../assets/Images/fundoplacar.png")}
+        resizeMode="Cover"
+      >
+        <View style={styles.infoContainer}>
+          <Text style={styles.date}>{dataHoraJogo}</Text>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.teamScore}>{goals.home}</Text>
-          <Text style={styles.vsText}>VS</Text>
-          <Text style={styles.teamScore}>{goals.away}</Text>
-        </View>
-        <View style={styles.team}>
-          {/* Placar time visitante */}
 
-          <Image source={{ uri: teams.away.logo }} style={styles.logo} />
-          <Text style={styles.teamName}>{teams.away.name}</Text>
-        </View>
-      </View>
+        <View style={styles.teamsContainer}>
+          <View style={styles.team}>
+            <Image source={{ uri: teams.home.logo }} style={styles.logo} />
+            <Text style={styles.teamName}>{teams.home.name}</Text>
+            {/* Placar time da casa */}
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.teamScore}>{goals.home}</Text>
+            <Text style={styles.vsText}>VS</Text>
+            <Text style={styles.teamScore}>{goals.away}</Text>
+          </View>
+          <View style={styles.team}>
+            {/* Placar time visitante */}
 
-      <View style={styles.extraInfoContainer}>
-        <Text style={styles.extraInfoText}>Estádio: {fixture.venue.name}</Text>
-        <Text style={styles.extraInfoText}>
-          Árbitro: {fixture.referee || "Informação não disponível"}
-        </Text>
-      </View>
+            <Image source={{ uri: teams.away.logo }} style={styles.logo} />
+            <Text style={styles.teamName}>{teams.away.name}</Text>
+          </View>
+        </View>
+
+        <View style={styles.extraInfoContainer}>
+          <Text style={styles.extraInfoText}>
+            Estádio: {fixture.venue.name}
+          </Text>
+          <Text style={styles.extraInfoText}>
+            Árbitro: {fixture.referee || "Informação não disponível"}
+          </Text>
+        </View>
+      </ImageBackground>
       <View style={styles.botoesContainer}>
         <Button
           title="Estatísticas"

@@ -6,13 +6,14 @@ import {
   StyleSheet,
   View,
   Text,
+  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
 import HeaderComponent from "../components/HeaderComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
 import { Video, ResizeMode } from "expo-av";
-import { stylesPartidas } from "../styles/StylePartidas";
+import { stylesTorneios } from "../styles/StyleTorneios";
 import { API_FOOTBALL_KEY } from "@env";
 import TorneioCardComponent from "../components/TorneioCardComponent";
 import TxtComponent from "../components/TxtComponent";
@@ -20,9 +21,11 @@ import TxtComponent from "../components/TxtComponent";
 export default function Torneios() {
   const [loading, setLoading] = useState(true);
   const [torneios, setTorneios] = useState([]);
+  const [paises, setPaises] = useState([]);
+  const [paisSelecionado, setPaisSelecionado] = useState(null);
   const timezone = "America/Sao_Paulo";
 
-  // Lista de melhores ligas que queremos exibir primeiro com o país para garantir a precisão
+  // Lista de melhores ligas que queremos exibir primeiro
   const melhoresLigas = [
     { name: "Premier League", country: "England" },
     { name: "La Liga", country: "Spain" },
@@ -41,7 +44,7 @@ export default function Torneios() {
           "https://v3.football.api-sports.io/leagues",
           {
             params: {
-              season: new Date().getFullYear(), // Pega o ano atual
+              season: new Date().getFullYear(),
             },
             headers: {
               "x-rapidapi-host": "v3.football.api-sports.io",
@@ -51,10 +54,14 @@ export default function Torneios() {
         );
 
         if (response.data && response.data.response) {
-          // Filtrar apenas ligas (excluir copas)
           let ligas = response.data.response.filter(
             (league) => league.league && league.league.type === "League"
           );
+
+          // Filtrar os países distintos
+          const paisesUnicos = [
+            ...new Set(ligas.map((liga) => liga.country.name)),
+          ].sort();
 
           // Separar as melhores ligas e ordenar as demais alfabeticamente
           const melhores = ligas.filter((liga) =>
@@ -75,7 +82,6 @@ export default function Torneios() {
             )
             .sort((a, b) => a.league.name.localeCompare(b.league.name));
 
-          // Ordenar as melhores ligas na ordem definida no array "melhoresLigas"
           const melhoresOrdenadas = melhoresLigas
             .map((ml) =>
               melhores.find(
@@ -88,6 +94,7 @@ export default function Torneios() {
 
           const ligasOrdenadas = [...melhoresOrdenadas, ...outrasLigas];
 
+          setPaises(paisesUnicos);
           setTorneios(ligasOrdenadas);
         }
       } catch (error) {
@@ -102,12 +109,12 @@ export default function Torneios() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.videoContainer}>
+      <SafeAreaView style={stylesTorneios.videoContainer}>
         <StatusBar barStyle="light-content" />
         <HeaderComponent />
-        <View style={styles.videoContainer}>
+        <View style={stylesTorneios.videoContainer}>
           <Video
-            style={styles.video}
+            style={stylesTorneios.video}
             resizeMode={ResizeMode.CONTAIN}
             source={require("../assets/Images/Video/loading.mp4")}
             shouldPlay
@@ -120,30 +127,54 @@ export default function Torneios() {
   }
 
   return (
-    <SafeAreaView style={stylesPartidas.all}>
+    <SafeAreaView style={stylesTorneios.all}>
       <StatusBar barStyle="light-content" />
       <HeaderComponent />
       <EspaçoPropaganda />
-      <ScrollView contentContainerStyle={stylesPartidas.Container}>
+      <ScrollView contentContainerStyle={stylesTorneios.Container}>
         <View>
           <TxtComponent
-            texto={"Todas as Ligas"}
-            styleTxt={stylesPartidas.TextoPrincipal}
+            texto={"Melhores Ligas"}
+            styleTxt={stylesTorneios.TextoPrincipal}
           />
           {torneios.length > 0 ? (
-            torneios.map((torneio) => (
-              <TorneioCardComponent
-                key={torneio.league.id}
-                imagem={torneio.league.logo}
-                nome={torneio.league.name}
-                ligaId={torneio.league.id}
-              />
-            ))
+            torneios
+              .filter(
+                (torneio) =>
+                  !paisSelecionado || torneio.country.name === paisSelecionado
+              )
+              .map((torneio) => (
+                <TorneioCardComponent
+                  key={torneio.league.id}
+                  imagem={torneio.league.logo}
+                  nome={torneio.league.name}
+                  ligaId={torneio.league.id}
+                />
+              ))
           ) : (
-            <Text style={stylesPartidas.noDataText}>
+            <Text style={stylesTorneios.noDataText}>
               Nenhuma liga disponível.
             </Text>
           )}
+        </View>
+
+        <View>
+          <TxtComponent
+            texto={"Selecione o País"}
+            styleTxt={stylesTorneios.TextoPrincipal}
+          />
+          {paises.map((pais) => (
+            <TouchableOpacity
+              key={pais}
+              onPress={() => setPaisSelecionado(pais)}
+              style={[
+                stylesTorneios.paisButton,
+                paisSelecionado === pais && stylesTorneios.paisButtonSelected,
+              ]}
+            >
+              <Text style={stylesTorneios.paisButtonText}>{pais}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -151,14 +182,18 @@ export default function Torneios() {
 }
 
 const styles = StyleSheet.create({
-  videoContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
+  paisButton: {
+    padding: 10,
+    backgroundColor: "#1f1f1f",
+    borderRadius: 5,
+    marginVertical: 5,
   },
-  video: {
-    width: "100%",
-    height: "100%",
+  paisButtonSelected: {
+    backgroundColor: "#2f9fa6",
+  },
+  paisButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    textAlign: "center",
   },
 });

@@ -11,28 +11,132 @@ const formatHorario = (horario) => {
   return `${horas}:${minutos}`;
 };
 
-// Função para pegar o status do jogo
-const getStatusDoJogo = (status) => {
-  const statusMap = {
-    P: "Pênaltis",
-    PEN: "Pênaltis",
-  };
+// Função para buscar status de um único jogo por ID
+const pegarStatusDoJogo = async (fixtureId) => {
+  try {
+    const response = await axios.get(
+      `https://v3.football.api-sports.io/fixtures`,
+      {
+        params: { id: fixtureId, timezone: "America/Sao_Paulo" },
+        headers: {
+          "x-rapidapi-key": API_FOOTBALL_KEY,
+          "x-rapidapi-host": "v3.football.api-sports.io",
+        },
+      }
+    );
 
-  return statusMap[status] || "Indefinido";
+    const jogo = response.data.response[0];
+    const status = {
+      status: jogo.fixture.status.short,
+      minutos: jogo.fixture.status.elapsed,
+      penaltyScore: jogo.score.penalty ? jogo.score.penalty : null, // Adiciona o score dos pênaltis
+    };
+
+    return { [fixtureId]: status };
+  } catch (error) {
+    console.error("Erro ao buscar status do jogo:", error);
+    return {
+      [fixtureId]: { status: "Erro", minutos: null, penaltyScore: null },
+    };
+  }
 };
 
-const JogosDoDiaComponent = ({ jogos, statuses }) => {
+const JogosDoDiaComponent = ({ jogos }) => {
+  const [statuses, setStatuses] = useState({});
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (jogos && jogos.length > 0) {
+      jogos.forEach(async (jogo) => {
+        const statusMap = await pegarStatusDoJogo(jogo.fixtureId);
+        setStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          ...statusMap,
+        }));
+      });
+
+      const intervalo = setInterval(() => {
+        jogos.forEach(async (jogo) => {
+          const statusMap = await pegarStatusDoJogo(jogo.fixtureId);
+          setStatuses((prevStatuses) => ({
+            ...prevStatuses,
+            ...statusMap,
+          }));
+        });
+      }, 60000);
+
+      return () => clearInterval(intervalo);
+    }
+  }, [jogos]);
 
   const renderJogo = (jogo) => {
     const dataHoraInicio = moment
       .tz(jogo.dataHoraInicio, "America/Sao_Paulo")
       .format("DD/MM/YYYY HH:mm");
 
-    // Pega o status e minutos do jogo pelo fixtureId
     const statusInfo = statuses[jogo.fixtureId] || {};
     const statusDoJogo = statusInfo.status || "Carregando...";
     const minutos = statusInfo.minutos || null;
+
+    let statusComponent;
+    if (statusDoJogo === "PST") {
+      statusComponent = <Text style={styles.adiado}>Jogo adiado</Text>;
+    } else if (statusDoJogo === "CANC") {
+      statusComponent = <Text style={styles.adiado}>Jogo cancelado</Text>;
+    } else if (statusDoJogo === "SUSP") {
+      statusComponent = <Text style={styles.adiado}>Jogo suspenso</Text>;
+    } else if (statusDoJogo === "ABD") {
+      statusComponent = <Text style={styles.adiado}>Jogo abandonado</Text>;
+    } else if (statusDoJogo === "AWD") {
+      statusComponent = <Text style={styles.adiado}>Derrota técnica</Text>;
+    } else if (statusDoJogo === "INT") {
+      statusComponent = <Text style={styles.adiado}>Interrompido</Text>;
+    } else if (statusDoJogo === "WO") {
+      statusComponent = <Text style={styles.adiado}>W.O.</Text>;
+    } else if (["LIVE", "1H", "2H"].includes(statusDoJogo)) {
+      statusComponent = (
+        <View style={styles.ContainResultado}>
+          <Text style={styles.aoVivo}>
+            {`${minutos ? `${minutos} '` : ""}`}
+          </Text>
+          <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
+        </View>
+      );
+    } else if (statusDoJogo === "ET") {
+      statusComponent = (
+        <View style={styles.ContainResultado}>
+          <Text style={styles.aoVivo}>
+            {`Prorr ${minutos ? `${minutos} '` : ""}`}
+          </Text>
+          <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
+        </View>
+      );
+    } else if (statusDoJogo === "AET" || statusDoJogo === "PEN") {
+      statusComponent = (
+        <View style={styles.ContainResultado}>
+          <Text style={styles.aoVivo}>PEN</Text>
+          <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
+          {statusInfo.penaltyScore && (
+            <Text
+              style={styles.penaltyScore}
+            >{`${statusInfo.penaltyScore.home} - ${statusInfo.penaltyScore.away}`}</Text>
+          )}
+        </View>
+      );
+    } else if (statusDoJogo === "BT" || statusDoJogo === "HT") {
+      statusComponent = (
+        <View style={styles.ContainResultado}>
+          <Text style={{ color: "orange", fontSize: 8 }}>Intervalo</Text>
+          <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
+        </View>
+      );
+    } else if (statusDoJogo === "FT") {
+      statusComponent = <Text style={styles.resultado}>{jogo.resultado}</Text>;
+    } else {
+      statusComponent = (
+        <Text style={styles.horario}>{formatHorario(jogo.horario)}</Text>
+      );
+    }
 
     return (
       <TouchableOpacity
@@ -46,63 +150,7 @@ const JogosDoDiaComponent = ({ jogos, statuses }) => {
         <View style={styles.teamContainerHome}>
           <Text style={styles.equipes}>{jogo.timeCasa}</Text>
         </View>
-
-        {/* Se o jogo estiver adiado, exibe 'Jogo adiado', senão exibe o horário ou resultado */}
-        {statusDoJogo === "PST" ? (
-          <Text style={styles.adiado}>Jogo adiado</Text>
-        ) : statusDoJogo === "CANC" ? (
-          <Text style={styles.adiado}>Jogo cancelado</Text>
-        ) : statusDoJogo === "SUSP" ? (
-          <Text style={styles.adiado}>Jogo suspenso</Text>
-        ) : statusDoJogo === "ABD" ? (
-          <Text style={styles.adiado}>Jogo abandonado</Text>
-        ) : statusDoJogo === "AWD" ? (
-          <Text style={styles.adiado}>Derrota técnica</Text>
-        ) : statusDoJogo === "INT" ? (
-          <Text style={styles.adiado}>Interrompido</Text>
-        ) : statusDoJogo === "WO" ? (
-          <Text style={styles.adiado}>W.O.</Text>
-        ) : statusDoJogo === "LIVE" ||
-          statusDoJogo === "1H" ||
-          statusDoJogo === "2H" ||
-          statusDoJogo === "PEN" ? (
-          <>
-            <View style={styles.ContainResultado}>
-              <Text style={styles.aoVivo}>
-                {`${minutos ? `${minutos} '` : ""}`}
-              </Text>
-              <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
-            </View>
-          </>
-        ) : statusDoJogo === "ET" ? (
-          <>
-            <View style={styles.ContainResultado}>
-              <Text style={styles.aoVivo}>
-                {`"Prg" ${minutos ? `${minutos} '` : ""}`}
-              </Text>
-              <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
-            </View>
-          </>
-        ) : statusDoJogo === "AET" ? (
-          <>
-            <View style={styles.ContainResultado}>
-              <Text style={styles.aoVivo}>{`"PEN"`}</Text>
-              <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
-            </View>
-          </>
-        ) : statusDoJogo === "BT" || statusDoJogo === "HT" ? (
-          <>
-            <View style={styles.ContainResultado}>
-              <Text style={{ color: "orange", fontSize: 8 }}>Intervalo</Text>
-              <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
-            </View>
-          </>
-        ) : statusDoJogo === "FT" ? (
-          <Text style={styles.resultado}>{jogo.resultado}</Text>
-        ) : (
-          <Text style={styles.horario}>{formatHorario(jogo.horario)}</Text>
-        )}
-
+        {statusComponent}
         <View style={styles.teamContainerAway}>
           <Text style={styles.equipes}>{jogo.timeVisitante}</Text>
         </View>
@@ -126,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     marginTop: 10,
-    padding: 5,
+    padding: "1.5%",
     borderRadius: 10,
   },
   teamContainerHome: {
@@ -159,7 +207,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: "#2f9fa6",
-    paddingHorizontal: 10,
+    paddingHorizontal: "3%",
     textAlign: "center",
     margin: "3%",
   },
@@ -169,7 +217,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: "#2f9fa6",
-    paddingHorizontal: 10,
+    paddingHorizontal: "3%",
     textAlign: "center",
     margin: "3%",
   },
@@ -185,24 +233,21 @@ const styles = StyleSheet.create({
   },
   aoVivo: {
     fontSize: 10,
-    color: "#2f9fa6",
+    color: "red",
+    marginRight: "2%",
   },
   ContainResultado: {
-    color: "#f00",
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderColor: "#2f9fa6",
-    paddingHorizontal: "3%",
+    paddingHorizontal: "2%",
     textAlign: "center",
-    justifyContent: "center",
-    alignItems: "center",
     margin: "3%",
+    flexDirection: "column",
+    alignItems: "center",
   },
-  resultadoAoVivo: {
-    fontSize: 16,
-    color: "white",
-    paddingHorizontal: "1%",
-  },
+  resultadoAoVivo: { fontSize: 16, color: "white" },
+  penaltyScore: { fontSize: 12, color: "yellow", marginTop: 2 },
 });
 
 export default JogosDoDiaComponent;
