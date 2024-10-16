@@ -41,7 +41,7 @@ export default function CompeticaoCardComponent({
           <View style={styles.info}>
             <Text style={styles.nome}>{isUEFA ? "UEFA" : nome}</Text>
             <Text style={styles.quantidadeJogos}>
-              {`${finalizados} / ${quantidadeJogos} jogos`}
+              {`${quantidadeJogos} jogos`}
             </Text>
           </View>
         </Animated.View>

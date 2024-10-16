@@ -10,9 +10,11 @@ import Favoritos from "../pages/Favoritos";
 import Splash from "../pages/splash";
 import Login from "../pages/Login";
 import DetalhesDoJogo from "../pages/DetalhesDoJogo";
+import Album from "../pages/Album";
 
 // Importando Icons
 import { FontAwesome } from "@expo/vector-icons";
+import Entypo from "@expo/vector-icons/Entypo";
 
 // Const para o uso do Stack (rotas)
 const Tab = createBottomTabNavigator();
@@ -132,6 +134,27 @@ export default function Routes() {
               label="Perfil"
               color={color}
             />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Album"
+        component={Album}
+        options={{
+          headerShown: false,
+          title: "",
+          tabBarIcon: ({ color }) => (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                marginTop: "15%",
+              }}
+            >
+              <Entypo name="book" size={24} color={color} />
+              <Text style={{ color, fontSize: 12 }}>Álbum</Text>
+            </View>
           ),
         }}
       />

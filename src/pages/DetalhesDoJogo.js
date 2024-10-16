@@ -13,7 +13,12 @@ import {
 import axios from "axios";
 import moment from "moment-timezone";
 import { API_FOOTBALL_KEY } from "@env";
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import {
+  FontAwesome5,
+  MaterialIcons,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const windowWidth = Dimensions.get("window").width;
@@ -23,7 +28,8 @@ export default function DetalhesDoJogo({ route }) {
   const [jogo, setJogo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showHomeTeam, setShowHomeTeam] = useState(true);
-  const [opcaoSelecionada, setOpcaoSelecionada] = useState("Estatisticas");
+  const [opcaoSelecionada, setOpcaoSelecionada] = useState("Eventos");
+
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -200,16 +206,30 @@ export default function DetalhesDoJogo({ route }) {
             <Text style={styles.teamName}>{teams.home.name}</Text>
             {/* Placar time da casa */}
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={styles.teamScore}>{goals.home}</Text>
-            <Text style={styles.vsText}>VS</Text>
-            <Text style={styles.teamScore}>{goals.away}</Text>
+          <View style={{ flexDirection: "column", alignItems: "center" }}>
+            {jogoEncerrado && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "white",
+                }}
+              >
+                Jogo Finalizado
+              </Text>
+            )}
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text style={styles.teamScore}>{goals.home}</Text>
+              <Text style={styles.vsText}>VS</Text>
+              <Text style={styles.teamScore}>{goals.away}</Text>
+            </View>
           </View>
           <View style={styles.team}>
             {/* Placar time visitante */}
@@ -228,23 +248,59 @@ export default function DetalhesDoJogo({ route }) {
           </Text>
         </View>
       </ImageBackground>
-      <View style={styles.botoesContainer}>
-        <Button
-          title="Estatísticas"
-          onPress={() => setOpcaoSelecionada("Estatisticas")}
-          color={opcaoSelecionada === "Estatisticas" ? "#2f9fa6" : "#000"}
-        />
-        <Button
-          title="Eventos"
-          onPress={() => setOpcaoSelecionada("Eventos")}
-          color={opcaoSelecionada === "Eventos" ? "#2f9fa6" : "#000"}
-        />
-        <Button
-          title="Escalações"
-          onPress={() => setOpcaoSelecionada("Escalacoes")}
-          color={opcaoSelecionada === "Escalacoes" ? "#2f9fa6" : "#000"}
-        />
-      </View>
+      <ScrollView>
+        <View style={styles.botoesContainer}>
+          <View style={styles.BtnInfos}>
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  opcaoSelecionada === "Eventos" ? "#2f9fa6" : "#2C2C2E",
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 5,
+              }}
+              onPress={() => setOpcaoSelecionada("Eventos")}
+            >
+              <FontAwesome5 name="exchange-alt" size={20} color="white" />
+              <Text style={{ color: "white" }}>Eventos</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.BtnInfos}>
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  opcaoSelecionada === "Escalacoes" ? "#2f9fa6" : "#2C2C2E",
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 5,
+              }}
+              onPress={() => setOpcaoSelecionada("Escalacoes")}
+            >
+              <MaterialCommunityIcons
+                name="soccer-field"
+                size={20}
+                color="white"
+              />
+              <Text style={{ color: "white" }}>Escalações</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.BtnInfos}>
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  opcaoSelecionada === "Estatisticas" ? "#2f9fa6" : "#2C2C2E",
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 5,
+              }}
+              onPress={() => setOpcaoSelecionada("Estatisticas")}
+            >
+              <Ionicons name="stats-chart" size={20} color="white" />
+              <Text style={{ color: "white" }}>Estatísticas</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
       {opcaoSelecionada === "Estatisticas" && (
         <View style={styles.statisticsContainer}>
           <Text style={styles.sectionTitle}>Estatísticas da Partida</Text>
@@ -445,13 +501,13 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 18,
-    color: "#666", // manter o texto da data em cinza suave
+    color: "white", // manter o texto da data em cinza suave
   },
   teamsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     alignItems: "center",
-    marginVertical: 20,
+    marginVertical: "3%",
   },
   team: {
     alignItems: "center",
@@ -462,9 +518,12 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   teamName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: "white",
+    textAlign: "center", // Centraliza o texto
+    flexWrap: "wrap", // Permite quebra de linha
+    maxWidth: windowWidth * 0.3, // Define um tamanho máximo para o texto
   },
   vsText: {
     fontSize: 20,
@@ -483,9 +542,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   extraInfoText: {
-    fontSize: 16,
-    color: "#999", // texto de informação extra em cinza claro
-    marginVertical: 5,
+    fontSize: 12,
+    color: "white", // texto de informação extra em cinza claro
   },
   lineupsContainer: {
     padding: 20,
@@ -610,5 +668,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     textAlign: "center",
+  },
+  botoesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+    marginVertical: "5%",
+  },
+  BtnInfos: {
+    width: "30%",
   },
 });

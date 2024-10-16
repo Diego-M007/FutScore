@@ -16,15 +16,17 @@ export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [tabela, setTabela] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Estado para capturar erros
 
   const fetchTabela = async () => {
     setLoading(true);
+    setError(null); // Resetar o erro antes da nova requisição
 
     try {
       const endpoint =
         tipo === "liga"
           ? "https://v3.football.api-sports.io/standings"
-          : "https://v3.football.api-sports.io/standings"; // Mesmo endpoint para copas com grupos
+          : "https://v3.football.api-sports.io/standings"; // Modificar se necessário para copas
 
       const response = await axios.get(endpoint, {
         params: {
@@ -42,13 +44,13 @@ export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
         if (tournamentData.league && tournamentData.league.standings) {
           setTabela(tournamentData.league.standings);
         } else {
-          console.error("Dados do torneio não disponíveis.");
+          setError("Dados do torneio não disponíveis.");
         }
       } else {
-        console.error("Resposta inesperada da API.");
+        setError("Nenhuma resposta válida da API.");
       }
     } catch (error) {
-      console.error("Erro ao buscar a tabela:", error.message);
+      setError("Erro ao buscar a tabela: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -76,6 +78,8 @@ export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
         <View style={styles.modalContainer}>
           {loading ? (
             <ActivityIndicator size="large" color="#00ff00" />
+          ) : error ? (
+            <Text style={styles.errorText}>{error}</Text> // Mostrar mensagem de erro
           ) : (
             <ScrollView contentContainerStyle={styles.scrollContainer}>
               {tabela.length > 0 ? (
@@ -181,6 +185,11 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     color: "#fff",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  errorText: {
+    color: "red", // Estilo para o texto de erro
     textAlign: "center",
     marginTop: 20,
   },

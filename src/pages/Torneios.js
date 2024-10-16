@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-import moment from "moment-timezone";
 import HeaderComponent from "../components/HeaderComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
 import { Video, ResizeMode } from "expo-av";
@@ -22,10 +21,8 @@ export default function Torneios() {
   const [loading, setLoading] = useState(true);
   const [torneios, setTorneios] = useState([]);
   const [paises, setPaises] = useState([]);
-  const [paisSelecionado, setPaisSelecionado] = useState(null);
-  const timezone = "America/Sao_Paulo";
+  const [expandedPais, setExpandedPais] = useState({});
 
-  // Lista de melhores ligas que queremos exibir primeiro
   const melhoresLigas = [
     { name: "Premier League", country: "England" },
     { name: "La Liga", country: "Spain" },
@@ -38,14 +35,10 @@ export default function Torneios() {
   useEffect(() => {
     const fetchTorneios = async () => {
       try {
-        const today = moment().tz(timezone).format("YYYY-MM-DD");
-
         const response = await axios.get(
           "https://v3.football.api-sports.io/leagues",
           {
-            params: {
-              season: new Date().getFullYear(),
-            },
+            params: { season: new Date().getFullYear() },
             headers: {
               "x-rapidapi-host": "v3.football.api-sports.io",
               "x-rapidapi-key": API_FOOTBALL_KEY,
@@ -58,12 +51,10 @@ export default function Torneios() {
             (league) => league.league && league.league.type === "League"
           );
 
-          // Filtrar os países distintos
           const paisesUnicos = [
             ...new Set(ligas.map((liga) => liga.country.name)),
           ].sort();
 
-          // Separar as melhores ligas e ordenar as demais alfabeticamente
           const melhores = ligas.filter((liga) =>
             melhoresLigas.some(
               (ml) =>
@@ -107,6 +98,13 @@ export default function Torneios() {
     fetchTorneios();
   }, []);
 
+  const toggleExpandPais = (pais) => {
+    setExpandedPais((prev) => ({
+      ...prev,
+      [pais]: !prev[pais],
+    }));
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={stylesTorneios.videoContainer}>
@@ -139,9 +137,12 @@ export default function Torneios() {
           />
           {torneios.length > 0 ? (
             torneios
-              .filter(
-                (torneio) =>
-                  !paisSelecionado || torneio.country.name === paisSelecionado
+              .filter((torneio) =>
+                melhoresLigas.some(
+                  (ml) =>
+                    ml.name === torneio.league.name &&
+                    ml.country === torneio.country.name
+                )
               )
               .map((torneio) => (
                 <TorneioCardComponent
@@ -149,6 +150,7 @@ export default function Torneios() {
                   imagem={torneio.league.logo}
                   nome={torneio.league.name}
                   ligaId={torneio.league.id}
+                  style={stylesTorneios.torneioCard}
                 />
               ))
           ) : (
@@ -163,18 +165,37 @@ export default function Torneios() {
             texto={"Selecione o País"}
             styleTxt={stylesTorneios.TextoPrincipal}
           />
-          {paises.map((pais) => (
-            <TouchableOpacity
-              key={pais}
-              onPress={() => setPaisSelecionado(pais)}
-              style={[
-                stylesTorneios.paisButton,
-                paisSelecionado === pais && stylesTorneios.paisButtonSelected,
-              ]}
-            >
-              <Text style={stylesTorneios.paisButtonText}>{pais}</Text>
-            </TouchableOpacity>
-          ))}
+          {paises.length > 0 ? (
+            paises.map((pais) => (
+              <View key={pais}>
+                <TouchableOpacity
+                  onPress={() => toggleExpandPais(pais)}
+                  style={styles.paisButton}
+                >
+                  <Text style={styles.paisButtonText}>{pais}</Text>
+                </TouchableOpacity>
+                {expandedPais[pais] && (
+                  <View style={styles.ligasContainer}>
+                    {torneios
+                      .filter((torneio) => torneio.country.name === pais)
+                      .map((torneio) => (
+                        <TorneioCardComponent
+                          key={torneio.league.id}
+                          imagem={torneio.league.logo}
+                          nome={torneio.league.name}
+                          ligaId={torneio.league.id}
+                          style={stylesTorneios.torneioCard}
+                        />
+                      ))}
+                  </View>
+                )}
+              </View>
+            ))
+          ) : (
+            <Text style={stylesTorneios.noDataText}>
+              Nenhum país disponível.
+            </Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -185,15 +206,16 @@ const styles = StyleSheet.create({
   paisButton: {
     padding: 10,
     backgroundColor: "#1f1f1f",
-    borderRadius: 5,
+    borderRadius: 20,
     marginVertical: 5,
-  },
-  paisButtonSelected: {
-    backgroundColor: "#2f9fa6",
   },
   paisButtonText: {
     color: "#fff",
     fontSize: 18,
     textAlign: "center",
+  },
+  ligasContainer: {
+    paddingLeft: 20,
+    paddingVertical: 10,
   },
 });

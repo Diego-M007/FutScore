@@ -463,7 +463,7 @@ const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
                       marginLeft: "10%",
                     }}
                   >
-                    {totalFinalizados} / {totalJogos}
+                    {totalJogos} Jogos
                   </Text>
                 </View>
               </TouchableOpacity>
