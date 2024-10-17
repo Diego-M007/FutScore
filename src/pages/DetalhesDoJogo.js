@@ -27,6 +27,7 @@ export default function DetalhesDoJogo({ route }) {
   const { jogoId } = route.params;
   const [jogo, setJogo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [minutagem, setMinutagem] = useState(null);
   const [showHomeTeam, setShowHomeTeam] = useState(true);
   const [opcaoSelecionada, setOpcaoSelecionada] = useState("Eventos");
 
@@ -47,6 +48,7 @@ export default function DetalhesDoJogo({ route }) {
         );
         if (response.data.response && response.data.response.length > 0) {
           setJogo(response.data.response[0]);
+          setMinutagem(response.data.response[0].fixture.status.elapsed || 0);
         }
       } catch (error) {
         console.error("Erro ao buscar detalhes do jogo:", error);
@@ -57,6 +59,26 @@ export default function DetalhesDoJogo({ route }) {
 
     fetchDetalhesDoJogo();
   }, [jogoId]);
+
+  useEffect(() => {
+    let intervalId;
+    if (
+      jogo &&
+      (jogo.fixture.status.short === "LIVE" ||
+        jogo.fixture.status.short === "1H" ||
+        jogo.fixture.status.short === "2H")
+    ) {
+      intervalId = setInterval(() => {
+        setMinutagem((prevMinutagem) => prevMinutagem + 1);
+      }, 30000); // Atualiza a cada 1 minuto (60000 ms)
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId); // Limpa o intervalo quando o componente for desmontado
+      }
+    };
+  }, [jogo]);
 
   if (loading) {
     return (
@@ -91,6 +113,10 @@ export default function DetalhesDoJogo({ route }) {
   };
 
   const jogoEncerrado = fixture.status.short === "FT";
+  const jogoAoVivo =
+    fixture.status.short === "LIVE" ||
+    fixture.status.short === "2H" ||
+    fixture.status.short === "1H";
 
   const renderEventIcon = (event) => {
     switch (event.type) {
@@ -206,7 +232,17 @@ export default function DetalhesDoJogo({ route }) {
             <Text style={styles.teamName}>{teams.home.name}</Text>
             {/* Placar time da casa */}
           </View>
-          <View style={{ flexDirection: "column", alignItems: "center" }}>
+          <View
+            style={{
+              flexDirection: "column",
+              alignItems: "center",
+              borderRadius: 80,
+              backgroundColor: "rgba(44,44,46, 0.7)",
+              padding: 5,
+              borderColor: "#2f9fa6",
+              borderWidth: 1,
+            }}
+          >
             {jogoEncerrado && (
               <Text
                 style={{
@@ -216,6 +252,18 @@ export default function DetalhesDoJogo({ route }) {
                 }}
               >
                 Jogo Finalizado
+              </Text>
+            )}
+
+            {jogoAoVivo && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "#2f9fa6",
+                }}
+              >
+                {minutagem}'
               </Text>
             )}
 
@@ -402,35 +450,37 @@ export default function DetalhesDoJogo({ route }) {
           <Text style={styles.sectionTitle}>Escalações</Text>
 
           <View style={styles.toggleButtonContainer}>
-            <Button
-              title={
-                showHomeTeam
-                  ? `Ver Escalação ${teams.away.name}`
-                  : `Ver Escalação ${teams.home.name}`
-              }
+            <TouchableOpacity
+              style={styles.toggleButton}
               onPress={() => setShowHomeTeam(!showHomeTeam)}
-            />
+            >
+              <Text style={styles.toggleButtonText}>
+                {showHomeTeam
+                  ? `Ver Escalação ${teams.away.name}`
+                  : `Ver Escalação ${teams.home.name}`}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {showHomeTeam ? (
             <View style={styles.teamLineup}>
-              <Text style={styles.teamName}>
+              <Text style={styles.teamName2}>
                 {teams.home.name} -- Titulares --
               </Text>
               {lineups &&
                 lineups.length > 0 &&
                 lineups[0].startXI.map((player, index) => (
-                  <Text key={index} style={styles.playerName}>
+                  <Text key={index} style={styles.starterPlayer}>
                     {player.player.name}
                   </Text>
                 ))}
 
               <View style={styles.teamLineup}>
-                <Text style={styles.teamName}> -- Reservas --</Text>
+                <Text style={styles.teamName2}> -- Reservas --</Text>
                 {lineups &&
                   lineups.length > 0 &&
                   lineups[0].substitutes.map((player, index) => (
-                    <Text key={index} style={styles.playerName}>
+                    <Text key={index} style={styles.substitutePlayer}>
                       {player.player.name}
                     </Text>
                   ))}
@@ -438,22 +488,23 @@ export default function DetalhesDoJogo({ route }) {
             </View>
           ) : (
             <View style={styles.teamLineup}>
-              <Text style={styles.teamName}>
+              <Text style={styles.teamName2}>
                 {teams.away.name} -- Titulares --
               </Text>
               {lineups &&
                 lineups.length > 1 &&
                 lineups[1].startXI.map((player, index) => (
-                  <Text key={index} style={styles.playerName}>
+                  <Text key={index} style={styles.starterPlayer}>
                     {player.player.name}
                   </Text>
                 ))}
+
               <View style={styles.teamLineup}>
-                <Text style={styles.teamName}> -- Reservas --</Text>
+                <Text style={styles.teamName2}> -- Reservas --</Text>
                 {lineups &&
                   lineups.length > 1 &&
                   lineups[1].substitutes.map((player, index) => (
-                    <Text key={index} style={styles.playerName}>
+                    <Text key={index} style={styles.substitutePlayer}>
                       {player.player.name}
                     </Text>
                   ))}
@@ -545,37 +596,94 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "white", // texto de informação extra em cinza claro
   },
+  // Estilos atualizados
   lineupsContainer: {
     padding: 20,
     borderWidth: 1,
     borderColor: "#2f9fa6",
-    backgroundColor: "#2C2C2E", // fundo escuro similar à outra página
+    backgroundColor: "#1C1C1E", // fundo ainda mais escuro para contraste
     borderRadius: 8,
+    marginVertical: 5,
+    shadowColor: "#000", // Sombra para dar profundidade
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24, // Tamanho maior para destacar
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "white", // título de seção em branco
+    marginBottom: 15,
+    color: "white", // Título em azul claro para destaque
+    textAlign: "center",
   },
   teamLineup: {
     marginBottom: 20,
+    backgroundColor: "#333", // Fundo para diferenciar as seções
+    borderRadius: 10,
+    padding: 10,
+  },
+  teamName2: {
+    fontSize: 20,
+    color: "white", // Nome da equipe em dourado
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
   },
   playerName: {
     fontSize: 16,
-    color: "white", // nome dos jogadores em branco
-    marginVertical: 2,
+    color: "#fff", // Nome dos jogadores em branco
+    marginVertical: 4,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444", // Separador para cada jogador
+  },
+  starterPlayer: {
+    fontSize: 16,
+    color: "#2f9fa6", // Verde para titulares
+    fontWeight: "bold",
+    marginVertical: 4,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444",
+  },
+  substitutePlayer: {
+    fontSize: 16,
+    color: "#ff6347", // Vermelho claro para reservas
+    marginVertical: 4,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444",
   },
   toggleButtonContainer: {
-    padding: 20,
+    padding: 10,
+    marginVertical: 10,
     alignItems: "center",
   },
+  toggleButton: {
+    backgroundColor: "#00d4ff", // Botão com fundo azul claro
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  toggleButtonText: {
+    color: "#fff", // Texto do botão em branco
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
   statisticsContainer: {
     padding: 20,
     borderWidth: 1,
     borderColor: "#2f9fa6",
     backgroundColor: "#2C2C2E", // manter fundo escuro nas estatísticas
     borderRadius: 8,
+    marginVertical: 5,
   },
   statsRow: {
     flexDirection: "row",
@@ -624,6 +732,7 @@ const styles = StyleSheet.create({
     borderColor: "#2f9fa6",
     backgroundColor: "#2C2C2E", // fundo escuro para a seção de eventos
     borderRadius: 8,
+    marginVertical: 5,
   },
   eventRow: {
     flexDirection: "row",
