@@ -3,13 +3,11 @@ import {
   View,
   Text,
   Image,
-  StyleSheet,
   ScrollView,
-  Button,
-  Dimensions,
   TouchableOpacity,
   ImageBackground,
 } from "react-native";
+import { styles } from "../styles/StyleDetalhesDoJogo";
 import axios from "axios";
 import moment from "moment-timezone";
 import { API_FOOTBALL_KEY } from "@env";
@@ -18,10 +16,10 @@ import {
   MaterialIcons,
   Ionicons,
   MaterialCommunityIcons,
+  FontAwesome6,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-
-const windowWidth = Dimensions.get("window").width;
+import TabelaComponent from "../components/TabelaComponent";
 
 export default function DetalhesDoJogo({ route }) {
   const { jogoId } = route.params;
@@ -70,7 +68,7 @@ export default function DetalhesDoJogo({ route }) {
     ) {
       intervalId = setInterval(() => {
         setMinutagem((prevMinutagem) => prevMinutagem + 1);
-      }, 30000); // Atualiza a cada 1 minuto (60000 ms)
+      }, 30000); // Atualiza a cada 30 segundos
     }
 
     return () => {
@@ -98,7 +96,8 @@ export default function DetalhesDoJogo({ route }) {
     );
   }
 
-  const { teams, fixture, lineups, statistics, events, goals } = jogo;
+  const { teams, fixture, lineups, statistics, events, goals, league, round } =
+    jogo;
 
   const dataHoraJogo = moment
     .tz(fixture.date, "America/Sao_Paulo")
@@ -112,16 +111,39 @@ export default function DetalhesDoJogo({ route }) {
     return [porcentagemA, porcentagemB];
   };
 
+  const extrairRodada = (round) => {
+    if (!round) return ""; // Verifica se existe o valor
+    const partes = round.split(" - "); // Divide a string pelo " - "
+    return partes[1] ? partes[1] : round; // Retorna a segunda parte (rodada ou fase) ou a string completa se não houver " - "
+  };
+
   const jogoEncerrado = fixture.status.short === "FT";
   const jogoAoVivo =
     fixture.status.short === "LIVE" ||
     fixture.status.short === "2H" ||
     fixture.status.short === "1H";
+  const JogoIntervalo = fixture.status.short === "HT";
+  const JogonaoIniciado = fixture.status.short === "NS";
+  const JogoSuspenso = fixture.status.short === "SUSP";
+  const JogoInterrompido = fixture.status.short === "INT";
+  const JogoAdiado = fixture.status.short === "PST";
+  const JogoCancelado = fixture.status.short === "CANC";
+  const JogoAbandonado = fixture.status.short === "ABD";
 
   const renderEventIcon = (event) => {
     switch (event.type) {
       case "Goal":
-        return <FontAwesome5 name="futbol" size={16} color="green" />;
+        if (event.detail === "Own Goal") {
+          return <FontAwesome5 name="futbol" size={16} color="orange" />; // Gol contra
+        } else if (event.detail === "Missed Penalty") {
+          return <FontAwesome5 name="parking" size={16} color="red" />; // Pênalti perdido
+        } else if (event.detail === "Penalty") {
+          return <FontAwesome5 name="parking" size={16} color="green" />; // Pênalti convertido
+        } else if (event.detail === "Cancelled Goal") {
+          return <MaterialIcons name="cancel" size={16} color="orange" />; // Gol anulado
+        } else {
+          return <FontAwesome5 name="futbol" size={16} color="green" />; // Gol normal
+        }
       case "Card":
         if (event.detail === "Yellow Card") {
           return <MaterialIcons name="square" size={16} color="yellow" />;
@@ -136,6 +158,11 @@ export default function DetalhesDoJogo({ route }) {
       default:
         return null;
     }
+  };
+
+  const handleLeagueClick = () => {
+    // Navegar para a página da liga passando o ID da liga como parâmetro
+    navigation.navigate("PaginaLiga", { ligaId: jogo.league.id });
   };
 
   const getEventsByPeriod = (period) => {
@@ -180,7 +207,19 @@ export default function DetalhesDoJogo({ route }) {
               <>
                 <View style={styles.eventSide}>
                   <Text style={styles.eventDetailLeft}>
-                    {event.type === "subst" && event.assist
+                    {event.type === "Goal" && event.detail === "Normal Goal"
+                      ? event.player.name // Gol normal
+                      : event.type === "Goal" && event.detail === "Own Goal"
+                      ? `${event.player.name} (Gol Contra)` // Gol contra
+                      : event.type === "Goal" && event.detail === "Penalty"
+                      ? `${event.player.name} (Pênalti)` // Pênalti confirmado
+                      : event.type === "Goal" &&
+                        event.detail === "Missed Penalty"
+                      ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
+                      : event.type === "Goal" &&
+                        event.detail === "Cancelled Goal"
+                      ? `${event.player.name} (Gol Anulado)` // Gol anulado
+                      : event.type === "subst" && event.assist
                       ? `${event.player.name} entrou, ${event.assist.name} saiu`
                       : event.player.name}
                   </Text>
@@ -196,7 +235,19 @@ export default function DetalhesDoJogo({ route }) {
                 <View style={styles.eventSide}>
                   {renderEventIcon(event)}
                   <Text style={styles.eventDetailRight}>
-                    {event.type === "subst" && event.assist
+                    {event.type === "Goal" && event.detail === "Normal Goal"
+                      ? event.player.name // Gol normal
+                      : event.type === "Goal" && event.detail === "Own Goal"
+                      ? `${event.player.name} (Gol Contra)` // Gol contra
+                      : event.type === "Goal" && event.detail === "Penalty"
+                      ? `${event.player.name} (Pênalti)` // Pênalti confirmado
+                      : event.type === "Goal" &&
+                        event.detail === "Missed Penalty"
+                      ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
+                      : event.type === "Goal" &&
+                        event.detail === "Cancelled Goal"
+                      ? `${event.player.name} (Gol Anulado)` // Gol anulado
+                      : event.type === "subst" && event.assist
                       ? `${event.player.name} entrou, ${event.assist.name} saiu`
                       : event.player.name}
                   </Text>
@@ -220,35 +271,46 @@ export default function DetalhesDoJogo({ route }) {
 
       <ImageBackground
         source={require("../assets/Images/fundoplacar.png")}
-        resizeMode="Cover"
+        resizeMode="cover"
       >
         <View style={styles.infoContainer}>
           <Text style={styles.date}>{dataHoraJogo}</Text>
         </View>
 
+        <TouchableOpacity onPress={handleLeagueClick} style={styles.InfLeague}>
+          <Text style={styles.League}>
+            {league.name}, Rodada {extrairRodada(league.round)}
+          </Text>
+        </TouchableOpacity>
+
         <View style={styles.teamsContainer}>
-          <View style={styles.team}>
+          <TouchableOpacity style={styles.team}>
             <Image source={{ uri: teams.home.logo }} style={styles.logo} />
             <Text style={styles.teamName}>{teams.home.name}</Text>
-            {/* Placar time da casa */}
-          </View>
+          </TouchableOpacity>
+
           <View
-            style={{
-              flexDirection: "column",
-              alignItems: "center",
-              borderRadius: 80,
-              backgroundColor: "rgba(44,44,46, 0.7)",
-              padding: 5,
-              borderColor: "#2f9fa6",
-              borderWidth: 1,
-            }}
+            style={[
+              styles.Placar,
+              (JogonaoIniciado ||
+                JogoAbandonado ||
+                JogoAdiado ||
+                JogoCancelado ||
+                JogoInterrompido ||
+                JogoSuspenso) && {
+                backgroundColor: "transparent",
+                borderWidth: 0,
+              },
+            ]}
           >
             {jogoEncerrado && (
               <Text
                 style={{
                   justifyContent: "center",
                   alignItems: "center",
-                  color: "white",
+                  color: "#2f9fa6",
+                  fontSize: 12,
+                  fontWeight: "bold",
                 }}
               >
                 Jogo Finalizado
@@ -261,9 +323,89 @@ export default function DetalhesDoJogo({ route }) {
                   justifyContent: "center",
                   alignItems: "center",
                   color: "#2f9fa6",
+                  fontSize: 14,
+                  fontWeight: "bold",
                 }}
               >
                 {minutagem}'
+              </Text>
+            )}
+            {JogoIntervalo && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "orange",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Intervalo
+              </Text>
+            )}
+            {JogoSuspenso && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "orange",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Jogo Suspenso
+              </Text>
+            )}
+            {JogoInterrompido && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "orange",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Jogo Interrompido
+              </Text>
+            )}
+            {JogoAdiado && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "orange",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Jogo Adiado
+              </Text>
+            )}
+            {JogoCancelado && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "orange",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Jogo Cancelado
+              </Text>
+            )}
+            {JogoAbandonado && (
+              <Text
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "orange",
+                  fontSize: 12,
+                  fontWeight: "bold",
+                }}
+              >
+                Jogo JogoAbandonado
               </Text>
             )}
 
@@ -279,12 +421,12 @@ export default function DetalhesDoJogo({ route }) {
               <Text style={styles.teamScore}>{goals.away}</Text>
             </View>
           </View>
-          <View style={styles.team}>
+          <TouchableOpacity style={styles.team}>
             {/* Placar time visitante */}
 
             <Image source={{ uri: teams.away.logo }} style={styles.logo} />
             <Text style={styles.teamName}>{teams.away.name}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.extraInfoContainer}>
@@ -296,7 +438,7 @@ export default function DetalhesDoJogo({ route }) {
           </Text>
         </View>
       </ImageBackground>
-      <ScrollView>
+      <ScrollView horizontal={true}>
         <View style={styles.botoesContainer}>
           <View style={styles.BtnInfos}>
             <TouchableOpacity
@@ -345,6 +487,21 @@ export default function DetalhesDoJogo({ route }) {
             >
               <Ionicons name="stats-chart" size={20} color="white" />
               <Text style={{ color: "white" }}>Estatísticas</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.BtnInfos}>
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  opcaoSelecionada === "Tabela" ? "#2f9fa6" : "#2C2C2E",
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 5,
+              }}
+              onPress={() => setOpcaoSelecionada("Tabela")}
+            >
+              <FontAwesome6 name="table-list" size={20} color="white" />
+              <Text style={{ color: "white" }}>Tabela</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -445,6 +602,10 @@ export default function DetalhesDoJogo({ route }) {
         </View>
       )}
 
+      {opcaoSelecionada === "Tabela" && (
+        <TabelaComponent leagueId={jogo.league.id} />
+      )}
+
       {opcaoSelecionada === "Escalacoes" && (
         <View style={styles.lineupsContainer}>
           <Text style={styles.sectionTitle}>Escalações</Text>
@@ -516,275 +677,3 @@ export default function DetalhesDoJogo({ route }) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "black", // cor de fundo escura
-  },
-  backButton: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    zIndex: 10,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    fontSize: 18,
-    color: "white", // texto em branco para contraste
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red", // manter o texto de erro vermelho
-  },
-  infoContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  date: {
-    fontSize: 18,
-    color: "white", // manter o texto da data em cinza suave
-  },
-  teamsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    marginVertical: "3%",
-  },
-  team: {
-    alignItems: "center",
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    resizeMode: "contain",
-  },
-  teamName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center", // Centraliza o texto
-    flexWrap: "wrap", // Permite quebra de linha
-    maxWidth: windowWidth * 0.3, // Define um tamanho máximo para o texto
-  },
-  vsText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginHorizontal: 10,
-    color: "white",
-  },
-  teamScore: {
-    fontSize: 45,
-    fontWeight: "bold",
-    marginHorizontal: "4%",
-    color: "white",
-  },
-  extraInfoContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  extraInfoText: {
-    fontSize: 12,
-    color: "white", // texto de informação extra em cinza claro
-  },
-  // Estilos atualizados
-  lineupsContainer: {
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#2f9fa6",
-    backgroundColor: "#1C1C1E", // fundo ainda mais escuro para contraste
-    borderRadius: 8,
-    marginVertical: 5,
-    shadowColor: "#000", // Sombra para dar profundidade
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 6,
-  },
-  sectionTitle: {
-    fontSize: 24, // Tamanho maior para destacar
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "white", // Título em azul claro para destaque
-    textAlign: "center",
-  },
-  teamLineup: {
-    marginBottom: 20,
-    backgroundColor: "#333", // Fundo para diferenciar as seções
-    borderRadius: 10,
-    padding: 10,
-  },
-  teamName2: {
-    fontSize: 20,
-    color: "white", // Nome da equipe em dourado
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  playerName: {
-    fontSize: 16,
-    color: "#fff", // Nome dos jogadores em branco
-    marginVertical: 4,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "#444", // Separador para cada jogador
-  },
-  starterPlayer: {
-    fontSize: 16,
-    color: "#2f9fa6", // Verde para titulares
-    fontWeight: "bold",
-    marginVertical: 4,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "#444",
-  },
-  substitutePlayer: {
-    fontSize: 16,
-    color: "#ff6347", // Vermelho claro para reservas
-    marginVertical: 4,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "#444",
-  },
-  toggleButtonContainer: {
-    padding: 10,
-    marginVertical: 10,
-    alignItems: "center",
-  },
-  toggleButton: {
-    backgroundColor: "#00d4ff", // Botão com fundo azul claro
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  toggleButtonText: {
-    color: "#fff", // Texto do botão em branco
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-
-  statisticsContainer: {
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#2f9fa6",
-    backgroundColor: "#2C2C2E", // manter fundo escuro nas estatísticas
-    borderRadius: 8,
-    marginVertical: 5,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  statsRowContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-    borderBottomWidth: 1,
-    padding: 10,
-    borderColor: "white",
-  },
-  statsText: {
-    fontSize: 16,
-    color: "white", // texto das estatísticas em branco
-    fontWeight: "bold",
-  },
-  teamStatsTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "white", // título das estatísticas em branco
-  },
-  progressBarContainer: {
-    flexDirection: "row",
-    width: "60%",
-    height: 20,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginHorizontal: 5,
-  },
-  progressBar: {
-    height: "100%",
-  },
-  ContainerStats: {
-    flexDirection: "column",
-    alignItems: "center",
-    flex: 1,
-  },
-  eventsContainer: {
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#2f9fa6",
-    backgroundColor: "#2C2C2E", // fundo escuro para a seção de eventos
-    borderRadius: 8,
-    marginVertical: 5,
-  },
-  eventRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    paddingTop: 5,
-    marginTop: 5,
-  },
-  eventMinute: {
-    fontSize: 14,
-    fontWeight: "bold",
-    textAlign: "center",
-    flex: 1,
-    color: "white", // minutos dos eventos em branco
-  },
-  eventSide: {
-    flex: 2,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  eventDetailLeft: {
-    fontSize: 14,
-    marginRight: 5,
-    color: "white", // detalhe do evento em branco
-  },
-  eventDetailRight: {
-    fontSize: 14,
-    marginLeft: 5,
-    textAlign: "right",
-    color: "white", // detalhe do evento em branco
-  },
-  periodTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 10,
-    marginBottom: 5,
-    color: "white", // título do período em verde-água
-  },
-  noEventsText: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-  },
-  botoesContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    marginVertical: "5%",
-  },
-  BtnInfos: {
-    width: "30%",
-  },
-});

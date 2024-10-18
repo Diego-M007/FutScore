@@ -11,6 +11,7 @@ import Splash from "../pages/splash";
 import Login from "../pages/Login";
 import DetalhesDoJogo from "../pages/DetalhesDoJogo";
 import Album from "../pages/Album";
+import PaginaLiga from "../pages/PaginaLiga";
 
 // Importando Icons
 import { FontAwesome } from "@expo/vector-icons";
@@ -68,6 +69,14 @@ export default function Routes() {
       <Tab.Screen
         name="Login"
         component={Login}
+        options={{
+          headerShown: false,
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="PaginaLiga"
+        component={PaginaLiga}
         options={{
           headerShown: false,
           tabBarButton: () => null,

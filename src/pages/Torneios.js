@@ -3,25 +3,27 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
-  StyleSheet,
   View,
   Text,
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import HeaderComponent from "../components/HeaderComponent";
-import EspaçoPropaganda from "../components/PropagandoComponent";
+import EspacoPropaganda from "../components/PropagandoComponent";
 import { Video, ResizeMode } from "expo-av";
 import { stylesTorneios } from "../styles/StyleTorneios";
 import { API_FOOTBALL_KEY } from "@env";
 import TorneioCardComponent from "../components/TorneioCardComponent";
 import TxtComponent from "../components/TxtComponent";
+import TabelaModalComponent from "../components/TabelaModalComponent"; // Adicionei o componente de Tabela
 
 export default function Torneios() {
   const [loading, setLoading] = useState(true);
   const [torneios, setTorneios] = useState([]);
   const [paises, setPaises] = useState([]);
   const [expandedPais, setExpandedPais] = useState({});
+  const [isTabelaModalVisible, setTabelaModalVisible] = useState(false); // Estado do modal de tabela
+  const [selectedLigaId, setSelectedLigaId] = useState(null); // Liga ou copa selecionada
 
   const melhoresLigas = [
     { name: "Premier League", country: "England" },
@@ -49,6 +51,9 @@ export default function Torneios() {
         if (response.data && response.data.response) {
           let ligas = response.data.response.filter(
             (league) => league.league && league.league.type === "League"
+          );
+          let copas = response.data.response.filter(
+            (league) => league.league && league.league.type === "Cup"
           );
 
           const paisesUnicos = [
@@ -105,6 +110,12 @@ export default function Torneios() {
     }));
   };
 
+  // Função para abrir o modal de tabela
+  const openTabelaModal = (ligaId) => {
+    setSelectedLigaId(ligaId);
+    setTabelaModalVisible(true);
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={stylesTorneios.videoContainer}>
@@ -128,9 +139,10 @@ export default function Torneios() {
     <SafeAreaView style={stylesTorneios.all}>
       <StatusBar barStyle="light-content" />
       <HeaderComponent />
-      <EspaçoPropaganda />
+      <EspacoPropaganda />
       <ScrollView contentContainerStyle={stylesTorneios.Container}>
-        <View>
+        {/* Exibição das Melhores Ligas */}
+        <View style={stylesTorneios.section}>
           <TxtComponent
             texto={"Melhores Ligas"}
             styleTxt={stylesTorneios.TextoPrincipal}
@@ -150,6 +162,7 @@ export default function Torneios() {
                   imagem={torneio.league.logo}
                   nome={torneio.league.name}
                   ligaId={torneio.league.id}
+                  onPress={() => openTabelaModal(torneio.league.id)} // Abre o modal de tabela
                   style={stylesTorneios.torneioCard}
                 />
               ))
@@ -160,7 +173,8 @@ export default function Torneios() {
           )}
         </View>
 
-        <View>
+        {/* Exibição dos Países */}
+        <View style={stylesTorneios.section}>
           <TxtComponent
             texto={"Selecione o País"}
             styleTxt={stylesTorneios.TextoPrincipal}
@@ -170,12 +184,15 @@ export default function Torneios() {
               <View key={pais}>
                 <TouchableOpacity
                   onPress={() => toggleExpandPais(pais)}
-                  style={styles.paisButton}
+                  style={[
+                    stylesTorneios.paisButton,
+                    expandedPais[pais] && stylesTorneios.paisButtonSelected,
+                  ]}
                 >
-                  <Text style={styles.paisButtonText}>{pais}</Text>
+                  <Text style={stylesTorneios.paisButtonText}>{pais}</Text>
                 </TouchableOpacity>
                 {expandedPais[pais] && (
-                  <View style={styles.ligasContainer}>
+                  <View style={stylesTorneios.ligasContainer}>
                     {torneios
                       .filter((torneio) => torneio.country.name === pais)
                       .map((torneio) => (
@@ -184,6 +201,7 @@ export default function Torneios() {
                           imagem={torneio.league.logo}
                           nome={torneio.league.name}
                           ligaId={torneio.league.id}
+                          onPress={() => openTabelaModal(torneio.league.id)} // Abre o modal de tabela
                           style={stylesTorneios.torneioCard}
                         />
                       ))}
@@ -198,24 +216,13 @@ export default function Torneios() {
           )}
         </View>
       </ScrollView>
+
+      {/* Modal de Tabela */}
+      <TabelaModalComponent
+        visible={isTabelaModalVisible}
+        onClose={() => setTabelaModalVisible(false)}
+        ligaId={selectedLigaId}
+      />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  paisButton: {
-    padding: 10,
-    backgroundColor: "#1f1f1f",
-    borderRadius: 20,
-    marginVertical: 5,
-  },
-  paisButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    textAlign: "center",
-  },
-  ligasContainer: {
-    paddingLeft: 20,
-    paddingVertical: 10,
-  },
-});

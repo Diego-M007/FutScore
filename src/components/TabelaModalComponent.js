@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,10 +12,15 @@ import {
 import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
 
-export default function TabelaModalComponent({ imagem, nome, ligaId }) {
-  const [modalVisible, setModalVisible] = useState(false);
+export default function TabelaModalComponent({ visible, onClose, ligaId }) {
   const [tabela, setTabela] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (ligaId && visible) {
+      fetchTabela();
+    }
+  }, [ligaId, visible]);
 
   const fetchTabela = async () => {
     setLoading(true);
@@ -23,10 +28,7 @@ export default function TabelaModalComponent({ imagem, nome, ligaId }) {
       const response = await axios.get(
         `https://v3.football.api-sports.io/standings`,
         {
-          params: {
-            season: new Date().getFullYear(),
-            league: ligaId,
-          },
+          params: { league: ligaId, season: new Date().getFullYear() },
           headers: {
             "x-rapidapi-host": "v3.football.api-sports.io",
             "x-rapidapi-key": API_FOOTBALL_KEY,
@@ -34,155 +36,71 @@ export default function TabelaModalComponent({ imagem, nome, ligaId }) {
         }
       );
 
-      // Verificação adicional para evitar erros
-      if (
-        response.data &&
-        response.data.response &&
-        response.data.response.length > 0
-      ) {
-        const leagueData = response.data.response[0];
-        if (leagueData.league && leagueData.league.standings) {
-          const standings = leagueData.league.standings[0];
-          setTabela(standings);
-        } else {
-          console.error("Dados da liga não disponíveis.");
-        }
-      } else {
-        console.error("Resposta inesperada da API.");
+      if (response.data && response.data.response) {
+        setTabela(response.data.response[0].league.standings[0]);
       }
     } catch (error) {
-      console.error("Erro ao buscar a tabela:", error.message);
+      console.error("Erro ao buscar tabela:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePress = () => {
-    setModalVisible(true);
-    fetchTabela();
-  };
-
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={handlePress}>
-        <View style={styles.card}>
-          <Image source={{ uri: imagem }} style={styles.imagem} />
-          <Text style={styles.nome}>{nome}</Text>
-        </View>
-      </TouchableOpacity>
-
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
+    <Modal visible={visible} animationType="slide" transparent={true}>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
           {loading ? (
-            <ActivityIndicator size="large" color="#00ff00" />
+            <ActivityIndicator size="large" color="#0000ff" />
           ) : (
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView>
               {tabela.length > 0 ? (
-                tabela.map((team, index) => (
-                  <View key={team.team.id} style={styles.teamContainer}>
-                    <Text style={styles.teamPosition}>{index + 1}</Text>
-                    <Image
-                      source={{ uri: team.team.logo }}
-                      style={styles.teamLogo}
-                    />
-                    <Text style={styles.teamName}>{team.team.name}</Text>
-                    <Text style={styles.teamPoints}>{team.points} pts</Text>
+                tabela.map((time, index) => (
+                  <View key={time.team.id} style={styles.timeRow}>
+                    <Text>
+                      {index + 1} - {time.team.name}
+                    </Text>
+                    <Text>{time.points} pts</Text>
                   </View>
                 ))
               ) : (
-                <Text style={styles.noDataText}>
-                  Nenhuma tabela disponível.
-                </Text>
+                <Text>Nenhuma tabela disponível.</Text>
               )}
             </ScrollView>
           )}
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
         </View>
-      </Modal>
-    </View>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    margin: 10,
-  },
-  card: {
-    borderWidth: 1,
-    borderColor: "#2f9fa6",
-    borderRadius: 10,
-    padding: 10,
-    alignItems: "center",
-    backgroundColor: "#2C2C2E",
-  },
-  imagem: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-  },
-  nome: {
-    marginTop: 10,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-  },
   modalContainer: {
     flex: 1,
-    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
     padding: 20,
   },
-  scrollContainer: {
-    paddingBottom: 20,
-  },
-  teamContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  teamPosition: {
-    fontSize: 18,
-    color: "#fff",
-    width: 30,
-  },
-  teamLogo: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 10,
-    resizeMode: "contain",
-  },
-  teamName: {
-    fontSize: 18,
-    color: "#fff",
-    flex: 1,
-  },
-  teamPoints: {
-    fontSize: 18,
-    color: "#fff",
-  },
-  noDataText: {
-    color: "#fff",
-    textAlign: "center",
-    marginTop: 20,
-  },
   closeButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: "#2f9fa6",
-    alignItems: "center",
-    borderRadius: 10,
+    alignSelf: "flex-end",
+    marginBottom: 10,
   },
   closeButtonText: {
-    color: "#fff",
+    color: "red",
     fontSize: 16,
-    fontWeight: "bold",
+  },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 10,
   },
 });
