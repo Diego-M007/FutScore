@@ -96,9 +96,7 @@ const JogosDoDiaComponent = ({ jogos }) => {
     } else if (["LIVE", "1H", "2H"].includes(statusDoJogo)) {
       statusComponent = (
         <View style={styles.ContainResultado}>
-          <Text style={styles.aoVivo}>
-            {`${minutos ? `${minutos} '` : ""}`}
-          </Text>
+          <Text style={styles.aoVivo}>{`${minutos ? `${minutos}'` : ""}`}</Text>
           <Text style={styles.resultadoAoVivo}>{`${jogo.resultado}`}</Text>
         </View>
       );

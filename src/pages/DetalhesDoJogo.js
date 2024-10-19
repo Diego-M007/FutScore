@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  StyleSheet,
 } from "react-native";
 import { styles } from "../styles/StyleDetalhesDoJogo";
 import axios from "axios";
@@ -18,6 +19,7 @@ import {
   MaterialCommunityIcons,
   FontAwesome6,
 } from "@expo/vector-icons";
+import { Video, ResizeMode } from "expo-av";
 import { useNavigation } from "@react-navigation/native";
 import TabelaComponent from "../components/TabelaComponent";
 
@@ -80,8 +82,16 @@ export default function DetalhesDoJogo({ route }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Carregando...</Text>
+      <View style={stylesVideo.videoContainer}>
+        <Video
+          style={stylesVideo.video}
+          resizeMode={ResizeMode.CONTAIN}
+          source={require("../assets/Images/Video/loading.mp4")}
+          shouldPlay
+          isLooping={false}
+          isMuted={true}
+          onError={(error) => console.error("Erro ao carregar o vídeo:", error)}
+        />
       </View>
     );
   }
@@ -677,3 +687,16 @@ export default function DetalhesDoJogo({ route }) {
     </ScrollView>
   );
 }
+
+const stylesVideo = StyleSheet.create({
+  videoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
+  },
+  video: {
+    width: "1550%",
+    height: "50%",
+  },
+});
