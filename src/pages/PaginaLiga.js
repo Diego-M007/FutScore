@@ -97,8 +97,9 @@ const PaginaLiga = ({ route }) => {
               style={styles.jogoContainer}
               onPress={() => {
                 // Navega para a página de detalhes do jogo
+
                 navigation.navigate("DetalhesDoJogo", {
-                  jogoId: item.fixture.id,
+                  jogoId: jogos.fixtureId,
                 });
               }}
             >

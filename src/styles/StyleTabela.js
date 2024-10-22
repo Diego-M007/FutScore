@@ -77,6 +77,7 @@ export const styles = StyleSheet.create({
     height: 20,
     marginHorizontal: 2,
     textAlign: "center",
+    justifyContent: "center",
     color: "#fff",
     fontSize: 12,
   },

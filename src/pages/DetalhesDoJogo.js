@@ -149,8 +149,6 @@ export default function DetalhesDoJogo({ route }) {
           return <FontAwesome5 name="parking" size={16} color="red" />; // Pênalti perdido
         } else if (event.detail === "Penalty") {
           return <FontAwesome5 name="parking" size={16} color="green" />; // Pênalti convertido
-        } else if (event.detail === "Cancelled Goal") {
-          return <MaterialIcons name="cancel" size={16} color="orange" />; // Gol anulado
         } else {
           return <FontAwesome5 name="futbol" size={16} color="green" />; // Gol normal
         }
@@ -162,6 +160,14 @@ export default function DetalhesDoJogo({ route }) {
         } else if (event.detail === "Second Yellow card") {
           return <MaterialIcons name="warning" size={16} color="orange" />;
         }
+      case "Var":
+        if (event.detail === "Goal cancelled") {
+          return <MaterialIcons name="cancel" size={16} color="red" />;
+        }
+        // Gol anulado
+        else if (event.detail === "Penalty confirmed") {
+          return <MaterialIcons name="parking" size={16} color="green" />;
+        } // Penalti confrmado
         break;
       case "subst":
         return <FontAwesome5 name="exchange-alt" size={16} color="#2f9fa6" />;
@@ -254,9 +260,12 @@ export default function DetalhesDoJogo({ route }) {
                       : event.type === "Goal" &&
                         event.detail === "Missed Penalty"
                       ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
-                      : event.type === "Goal" &&
-                        event.detail === "Cancelled Goal"
-                      ? `${event.player.name} (Gol Anulado)` // Gol anulado
+                      : event.type === "Var" &&
+                        event.detail === "Goal cancelled"
+                      ? `${event.player.name} (Gol Anulado)`
+                      : event.type === "Var" &&
+                        event.detail === "Penalty confirmed"
+                      ? `Penalti Confirmado` // Gol anulado
                       : event.type === "subst" && event.assist
                       ? `${event.player.name} entrou, ${event.assist.name} saiu`
                       : event.player.name}
@@ -522,8 +531,20 @@ export default function DetalhesDoJogo({ route }) {
           {statistics && statistics.length >= 2 && (
             <>
               <View style={styles.statsRow}>
-                <Text style={styles.teamStatsTitle}>{teams.home.name}</Text>
-                <Text style={styles.teamStatsTitle}>{teams.away.name}</Text>
+                <View style={styles.StatsTeams}>
+                  <Image
+                    source={{ uri: teams.home.logo }}
+                    style={styles.logo1}
+                  />
+                  <Text style={styles.teamStatsTitle}>{teams.home.name}</Text>
+                </View>
+                <View style={styles.StatsTeams}>
+                  <Image
+                    source={{ uri: teams.away.logo }}
+                    style={styles.logo1}
+                  />
+                  <Text style={styles.teamStatsTitle}>{teams.away.name}</Text>
+                </View>
               </View>
               {statistics[0].statistics.map((stat, index) => {
                 const valorTimeCasa = parseInt(stat.value) || 0;
@@ -635,9 +656,13 @@ export default function DetalhesDoJogo({ route }) {
 
           {showHomeTeam ? (
             <View style={styles.teamLineup}>
-              <Text style={styles.teamName2}>
-                {teams.home.name} -- Titulares --
-              </Text>
+              <View style={styles.lineupTeams}>
+                <Text style={styles.teamName2}>
+                  {teams.home.name}, {lineups[0]?.formation}
+                </Text>
+                <Image source={{ uri: teams.home.logo }} style={styles.logo1} />
+              </View>
+              <Text style={styles.teamName2}>-- Titulares --</Text>
               {lineups &&
                 lineups.length > 0 &&
                 lineups[0].startXI.map((player, index) => (
@@ -656,12 +681,19 @@ export default function DetalhesDoJogo({ route }) {
                     </Text>
                   ))}
               </View>
+              <Text style={styles.teamName2}>
+                Treinador: {lineups[0]?.coach?.name}
+              </Text>
             </View>
           ) : (
             <View style={styles.teamLineup}>
-              <Text style={styles.teamName2}>
-                {teams.away.name} -- Titulares --
-              </Text>
+              <View style={styles.lineupTeams}>
+                <Text style={styles.teamName2}>
+                  {teams.away.name}, {lineups[1]?.formation}
+                </Text>
+                <Image source={{ uri: teams.away.logo }} style={styles.logo1} />
+              </View>
+              <Text style={styles.teamName2}>-- Titulares --</Text>
               {lineups &&
                 lineups.length > 1 &&
                 lineups[1].startXI.map((player, index) => (
@@ -680,6 +712,9 @@ export default function DetalhesDoJogo({ route }) {
                     </Text>
                   ))}
               </View>
+              <Text style={styles.teamName2}>
+                Treinador: {lineups[1]?.coach?.name}
+              </Text>
             </View>
           )}
         </View>

@@ -67,30 +67,6 @@ export default function Routes() {
         }}
       />
       <Tab.Screen
-        name="Login"
-        component={Login}
-        options={{
-          headerShown: false,
-          tabBarButton: () => null,
-        }}
-      />
-      <Tab.Screen
-        name="PaginaLiga"
-        component={PaginaLiga}
-        options={{
-          headerShown: false,
-          tabBarButton: () => null,
-        }}
-      />
-      <Tab.Screen
-        name="DetalhesDoJogo"
-        component={DetalhesDoJogo}
-        options={{
-          tabBarButton: () => null,
-          headerShown: false,
-        }}
-      />
-      <Tab.Screen
         name="Jogos do Dia"
         component={Partidas}
         options={{
@@ -105,6 +81,32 @@ export default function Routes() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Login"
+        component={Login}
+        options={{
+          headerShown: false,
+          tabBarButton: () => null,
+        }}
+      />
+
+      <Tab.Screen
+        name="DetalhesDoJogo"
+        component={DetalhesDoJogo}
+        options={{
+          tabBarButton: () => null,
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="PaginaLiga"
+        component={PaginaLiga}
+        options={{
+          headerShown: false,
+          tabBarButton: () => null,
+        }}
+      />
+
       <Tab.Screen
         name="Torneios"
         component={Torneios}

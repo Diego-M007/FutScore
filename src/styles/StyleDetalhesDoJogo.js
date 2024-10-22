@@ -65,6 +65,11 @@ export const styles = StyleSheet.create({
     height: 50,
     resizeMode: "contain",
   },
+  logo1: {
+    width: 30,
+    height: 30,
+    resizeMode: "contain",
+  },
   teamName: {
     fontSize: 15,
     fontWeight: "bold",
@@ -130,9 +135,15 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
+  lineupTeams: {
+    justifyContent: "space-between",
+    marginHorizontal: 5,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   teamName2: {
     fontSize: 20,
-    color: "white", // Nome da equipe em dourado
+    color: "white",
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
@@ -219,6 +230,10 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     padding: 10,
     borderColor: "white",
+  },
+  StatsTeams: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   statsText: {
     fontSize: 16,
@@ -309,5 +324,39 @@ export const styles = StyleSheet.create({
   BtnInfos: {
     marginHorizontal: 5, // Adiciona espaço entre os botões
     width: 110,
+  },
+  containerField: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  teamLineup: {
+    marginVertical: 20,
+  },
+  field: {
+    width: 300,
+    height: 400,
+    backgroundColor: "#43A047",
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+  player: {
+    position: "absolute",
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.8)",
+    borderRadius: 20,
+  },
+  playerName: {
+    fontSize: 10,
+    textAlign: "center",
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
 });
