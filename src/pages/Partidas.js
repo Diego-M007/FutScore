@@ -15,6 +15,7 @@ import { API_FOOTBALL_KEY } from "@env";
 import TxtComponent from "../components/TxtComponent";
 import EspaçoPropaganda from "../components/PropagandoComponent";
 import { Video, ResizeMode } from "expo-av";
+import LigasEspecificasComponent from "../components/PrincipaisLigasComponente";
 
 export default function Partidas() {
   const [jogosPorPais, setJogosPorPais] = useState({});
@@ -119,11 +120,13 @@ export default function Partidas() {
       <StatusBar barStyle="light-content" />
       <HeaderComponent onDateChange={setSelectedDate} />
       <EspaçoPropaganda />
-      <TxtComponent
-        texto={"Jogos do Dia"}
-        styleTxt={stylesPartidas.TextoPrincipal}
-      />
+
       <ScrollView contentContainerStyle={stylesPartidas.Container}>
+        <TxtComponent
+          texto={"Jogos do Dia"}
+          styleTxt={stylesPartidas.TextoPrincipal}
+        />
+
         <CompeticoesPorPaisComponent jogosPorPais={jogosPorPais} />
       </ScrollView>
     </SafeAreaView>

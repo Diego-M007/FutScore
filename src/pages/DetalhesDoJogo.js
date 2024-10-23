@@ -29,6 +29,8 @@ export default function DetalhesDoJogo({ route }) {
   const [loading, setLoading] = useState(true);
   const [minutagem, setMinutagem] = useState(null);
   const [showHomeTeam, setShowHomeTeam] = useState(true);
+  const [h2hData, setH2hData] = useState([]);
+
   const [opcaoSelecionada, setOpcaoSelecionada] = useState("Eventos");
 
   const navigation = useNavigation();
@@ -80,6 +82,39 @@ export default function DetalhesDoJogo({ route }) {
     };
   }, [jogo]);
 
+  useEffect(() => {
+    const fetchH2HData = async () => {
+      if (teams?.home?.id && teams?.away?.id) {
+        // Verifique se teams está definido
+        try {
+          const response = await axios.get(
+            "https://v3.football.api-sports.io/fixtures/headtohead",
+            {
+              headers: {
+                "x-rapidapi-key": API_FOOTBALL_KEY,
+                "x-rapidapi-host": "v3.football.api-sports.io",
+              },
+              params: {
+                h2h: `${teams.home.id}-${teams.away.id}`,
+              },
+            }
+          );
+          setH2hData(response.data.response); // Armazena os confrontos diretos
+        } catch (error) {
+          console.error("Erro ao buscar dados de H2H:", error);
+        }
+      }
+    };
+
+    if (
+      opcaoSelecionada === "Confrontos" &&
+      teams?.home?.id &&
+      teams?.away?.id
+    ) {
+      fetchH2HData();
+    }
+  }, [opcaoSelecionada, teams]); // Adicione "teams" como dependência
+
   if (loading) {
     return (
       <View style={stylesVideo.videoContainer}>
@@ -106,8 +141,7 @@ export default function DetalhesDoJogo({ route }) {
     );
   }
 
-  const { teams, fixture, lineups, statistics, events, goals, league, round } =
-    jogo;
+  const { teams, fixture, lineups, statistics, events, goals, league } = jogo;
 
   const dataHoraJogo = moment
     .tz(fixture.date, "America/Sao_Paulo")
@@ -146,9 +180,22 @@ export default function DetalhesDoJogo({ route }) {
         if (event.detail === "Own Goal") {
           return <FontAwesome5 name="futbol" size={16} color="orange" />; // Gol contra
         } else if (event.detail === "Missed Penalty") {
-          return <FontAwesome5 name="parking" size={16} color="red" />; // Pênalti perdido
+          return (
+            <Image
+              source={require("../assets/Images/penaltiperdido.png")}
+              resizeMode="contain"
+              style={styles.imagemEventos}
+            />
+          );
+          // Pênalti perdido
         } else if (event.detail === "Penalty") {
-          return <FontAwesome5 name="parking" size={16} color="green" />; // Pênalti convertido
+          return (
+            <Image
+              source={require("../assets/Images/penaltigol.png")}
+              resizeMode="contain"
+              style={styles.imagemEventos}
+            />
+          ); // Pênalti convertido
         } else {
           return <FontAwesome5 name="futbol" size={16} color="green" />; // Gol normal
         }
@@ -158,19 +205,43 @@ export default function DetalhesDoJogo({ route }) {
         } else if (event.detail === "Red Card") {
           return <MaterialIcons name="square" size={16} color="red" />;
         } else if (event.detail === "Second Yellow card") {
-          return <MaterialIcons name="warning" size={16} color="orange" />;
+          return (
+            <Image
+              source={require("../assets/Images/1.png")}
+              resizeMode="contain"
+              style={styles.imagemEventos}
+            />
+          );
         }
       case "Var":
         if (event.detail === "Goal cancelled") {
-          return <MaterialIcons name="cancel" size={16} color="red" />;
+          return (
+            <Image
+              source={require("../assets/Images/golanulado.png")}
+              resizeMode="contain"
+              style={styles.imagemEventos}
+            />
+          );
         }
         // Gol anulado
         else if (event.detail === "Penalty confirmed") {
-          return <MaterialIcons name="parking" size={16} color="green" />;
+          return (
+            <Image
+              source={require("../assets/Images/penalticonfirmado.png")}
+              resizeMode="contain"
+              style={styles.imagemEventos}
+            />
+          );
         } // Penalti confrmado
         break;
       case "subst":
-        return <FontAwesome5 name="exchange-alt" size={16} color="#2f9fa6" />;
+        return (
+          <Image
+            source={require("../assets/Images/substituição.png")}
+            resizeMode="contain"
+            style={styles.imagemEventos}
+          />
+        );
       default:
         return null;
     }
@@ -224,7 +295,7 @@ export default function DetalhesDoJogo({ route }) {
                 <View style={styles.eventSide}>
                   <Text style={styles.eventDetailLeft}>
                     {event.type === "Goal" && event.detail === "Normal Goal"
-                      ? event.player.name // Gol normal
+                      ? `${event.player.name}, (${event.assist.name})` // Gol normal
                       : event.type === "Goal" && event.detail === "Own Goal"
                       ? `${event.player.name} (Gol Contra)` // Gol contra
                       : event.type === "Goal" && event.detail === "Penalty"
@@ -236,7 +307,7 @@ export default function DetalhesDoJogo({ route }) {
                         event.detail === "Cancelled Goal"
                       ? `${event.player.name} (Gol Anulado)` // Gol anulado
                       : event.type === "subst" && event.assist
-                      ? `${event.player.name} entrou, ${event.assist.name} saiu`
+                      ? `${event.assist.name} entrou, ${event.player.name} saiu`
                       : event.player.name}
                   </Text>
                   {renderEventIcon(event)}
@@ -252,7 +323,7 @@ export default function DetalhesDoJogo({ route }) {
                   {renderEventIcon(event)}
                   <Text style={styles.eventDetailRight}>
                     {event.type === "Goal" && event.detail === "Normal Goal"
-                      ? event.player.name // Gol normal
+                      ? `${event.player.name} (${event.assist.name})` // Gol normal
                       : event.type === "Goal" && event.detail === "Own Goal"
                       ? `${event.player.name} (Gol Contra)` // Gol contra
                       : event.type === "Goal" && event.detail === "Penalty"
@@ -523,6 +594,21 @@ export default function DetalhesDoJogo({ route }) {
               <Text style={{ color: "white" }}>Tabela</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.BtnInfos}>
+            <TouchableOpacity
+              style={{
+                backgroundColor:
+                  opcaoSelecionada === "Confrontos" ? "#2f9fa6" : "#2C2C2E",
+                alignItems: "center",
+                padding: 10,
+                borderRadius: 5,
+              }}
+              onPress={() => setOpcaoSelecionada("Confrontos")}
+            >
+              <FontAwesome6 name="table-list" size={20} color="white" />
+              <Text style={{ color: "white" }}>Confrontos</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
       {opcaoSelecionada === "Estatisticas" && (
@@ -716,6 +802,53 @@ export default function DetalhesDoJogo({ route }) {
                 Treinador: {lineups[1]?.coach?.name}
               </Text>
             </View>
+          )}
+        </View>
+      )}
+      {opcaoSelecionada === "Confrontos" && (
+        <View style={styles.container}>
+          <Text style={styles.sectionTitle}>Últimos Confrontos Diretos</Text>
+          {h2hData && h2hData.length > 0 ? (
+            h2hData
+              .sort(
+                (a, b) => new Date(b.fixture.date) - new Date(a.fixture.date)
+              ) // Ordena por data, mais recente primeiro
+              .slice(0, 10) // Limita aos 10 últimos jogos
+              .map((confronto, index) => (
+                <TouchableOpacity key={index} style={styles.jogoContainerh2}>
+                  <Image
+                    source={{ uri: confronto.teams.home.logo }}
+                    style={styles.logoh2}
+                  />
+                  <View style={styles.teamContainerHomeh2}>
+                    <Text style={styles.equipesh2}>
+                      {confronto.teams.home.name}
+                    </Text>
+                  </View>
+                  <View style={styles.ContainResultadoh2}>
+                    <Text style={styles.resultadoAoVivoh2}>
+                      {confronto.goals.home} - {confronto.goals.away}
+                    </Text>
+                    <Text style={styles.h2hDate}>
+                      {moment(confronto.fixture.date).format("DD/MM/YYYY")}
+                    </Text>
+                    <Text style={styles.h2hCompetition}>
+                      {confronto.league.name}
+                    </Text>
+                  </View>
+                  <View style={styles.teamContainerAwayh2}>
+                    <Text style={styles.equipesh2}>
+                      {confronto.teams.away.name}
+                    </Text>
+                  </View>
+                  <Image
+                    source={{ uri: confronto.teams.away.logo }}
+                    style={styles.logoh2}
+                  />
+                </TouchableOpacity>
+              ))
+          ) : (
+            <Text style={styles.noH2hText}>Nenhum confronto disponível</Text>
           )}
         </View>
       )}

@@ -479,7 +479,6 @@ const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
                       imagem={competicao.imagem}
                       nome={competicao.nome}
                       quantidadeJogos={totalJogosCompeticao} // Total de jogos
-                      finalizados={finalizados} // Jogos finalizados
                       jogos={competicao.jogos}
                     />
                   );

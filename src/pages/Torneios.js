@@ -37,6 +37,8 @@ export default function Torneios() {
   useEffect(() => {
     const fetchTorneios = async () => {
       try {
+        console.log("API Key:", API_FOOTBALL_KEY); // Verificar se a chave está correta
+
         const response = await axios.get(
           "https://v3.football.api-sports.io/leagues",
           {
@@ -49,6 +51,8 @@ export default function Torneios() {
         );
 
         if (response.data && response.data.response) {
+          console.log("Dados recebidos da API:", response.data.response); // Verificar os dados recebidos
+
           let ligas = response.data.response.filter(
             (league) => league.league && league.league.type === "League"
           );
@@ -94,7 +98,13 @@ export default function Torneios() {
           setTorneios(ligasOrdenadas);
         }
       } catch (error) {
-        console.error("Erro ao buscar ligas:", error);
+        if (error.response) {
+          console.log("Erro de resposta:", error.response.data);
+        } else if (error.request) {
+          console.log("Nenhuma resposta recebida:", error.request);
+        } else {
+          console.log("Erro desconhecido:", error.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -112,8 +122,9 @@ export default function Torneios() {
 
   // Função para abrir o modal de tabela
   const openTabelaModal = (ligaId) => {
-    setSelectedLigaId(ligaId);
-    setTabelaModalVisible(true);
+    console.log("Abrindo modal para a liga:", ligaId); // Verificar se o ID está correto
+    setSelectedLigaId(ligaId); // Define a liga selecionada
+    setTabelaModalVisible(true); // Mostra o modal
   };
 
   if (loading) {
@@ -217,12 +228,14 @@ export default function Torneios() {
         </View>
       </ScrollView>
 
-      {/* Modal de Tabela */}
-      <TabelaModalComponent
-        visible={isTabelaModalVisible}
-        onClose={() => setTabelaModalVisible(false)}
-        ligaId={selectedLigaId}
-      />
+      {/* Modal de Tabela - Só é exibido se uma liga for selecionada */}
+      {selectedLigaId && (
+        <TabelaModalComponent
+          visible={isTabelaModalVisible}
+          onClose={() => setTabelaModalVisible(false)}
+          ligaId={selectedLigaId}
+        />
+      )}
     </SafeAreaView>
   );
 }
