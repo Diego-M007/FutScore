@@ -4,7 +4,7 @@ import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
 import { styles } from "../styles/StyleTabela"; // Certifique-se de ter os estilos corretos
 
-export default function TabelaComponent({ leagueId }) {
+export default function TabelaComponent({ leagueId, ano }) {
   const [tabela, setTabela] = useState([]);
   const [loadingTabela, setLoadingTabela] = useState(true);
 

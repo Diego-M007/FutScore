@@ -288,64 +288,77 @@ export default function DetalhesDoJogo({ route }) {
         >
           <Text style={styles.periodTitle}>{periodLabel}</Text>
         </View>
-        {periodEvents.map((event, index) => (
-          <View key={index} style={styles.eventRow}>
-            {event.team.name === teams.home.name ? (
-              <>
-                <View style={styles.eventSide}>
-                  <Text style={styles.eventDetailLeft}>
-                    {event.type === "Goal" && event.detail === "Normal Goal"
-                      ? `${event.player.name}, (${event.assist.name})` // Gol normal
-                      : event.type === "Goal" && event.detail === "Own Goal"
-                      ? `${event.player.name} (Gol Contra)` // Gol contra
-                      : event.type === "Goal" && event.detail === "Penalty"
-                      ? `${event.player.name} (Pênalti)` // Pênalti confirmado
-                      : event.type === "Goal" &&
-                        event.detail === "Missed Penalty"
-                      ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
-                      : event.type === "Goal" &&
-                        event.detail === "Cancelled Goal"
-                      ? `${event.player.name} (Gol Anulado)` // Gol anulado
-                      : event.type === "subst" && event.assist
-                      ? `${event.assist.name} entrou, ${event.player.name} saiu`
-                      : event.player.name}
-                  </Text>
-                  {renderEventIcon(event)}
-                </View>
-                <Text style={styles.eventMinute}>{event.time.elapsed}'</Text>
-                <View style={styles.eventSide} />
-              </>
-            ) : (
-              <>
-                <View style={styles.eventSide} />
-                <Text style={styles.eventMinute}>{event.time.elapsed}'</Text>
-                <View style={styles.eventSide}>
-                  {renderEventIcon(event)}
-                  <Text style={styles.eventDetailRight}>
-                    {event.type === "Goal" && event.detail === "Normal Goal"
-                      ? `${event.player.name} (${event.assist.name})` // Gol normal
-                      : event.type === "Goal" && event.detail === "Own Goal"
-                      ? `${event.player.name} (Gol Contra)` // Gol contra
-                      : event.type === "Goal" && event.detail === "Penalty"
-                      ? `${event.player.name} (Pênalti)` // Pênalti confirmado
-                      : event.type === "Goal" &&
-                        event.detail === "Missed Penalty"
-                      ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
-                      : event.type === "Var" &&
-                        event.detail === "Goal cancelled"
-                      ? `${event.player.name} (Gol Anulado)`
-                      : event.type === "Var" &&
-                        event.detail === "Penalty confirmed"
-                      ? `Penalti Confirmado` // Gol anulado
-                      : event.type === "subst" && event.assist
-                      ? `${event.player.name} entrou, ${event.assist.name} saiu`
-                      : event.player.name}
-                  </Text>
-                </View>
-              </>
-            )}
-          </View>
-        ))}
+        {periodEvents.map((event, index) => {
+          // Exibe os dados do evento no console para depuração
+          console.log(event);
+
+          return (
+            <View key={index} style={styles.eventRow}>
+              {event.team.name === teams.home.name ? (
+                <>
+                  <View style={styles.eventSide}>
+                    <Text style={styles.eventDetailLeft}>
+                      {event.type === "Goal" && event.detail === "Normal Goal"
+                        ? `${event.player.name} (assist, ${
+                            event.assist?.name || "sem assist"
+                          })` // Gol normal
+                        : event.type === "Goal" && event.detail === "Own Goal"
+                        ? `${event.player.name} (Gol Contra)` // Gol contra
+                        : event.type === "Goal" && event.detail === "Penalty"
+                        ? `${event.player.name} (Pênalti)` // Pênalti convertido
+                        : event.type === "Goal" &&
+                          event.detail === "Missed Penalty"
+                        ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
+                        : event.type === "Var" &&
+                          event.detail === "Goal cancelled"
+                        ? `${event.player.name} (Gol Anulado)` // Gol anulado por VAR
+                        : event.type === "Var" &&
+                          event.detail === "Penalty confirmed"
+                        ? `Pênalti Confirmado` // Pênalti confirmado por VAR
+                        : event.type === "subst" && event.assist
+                        ? `${event.assist.name} entrou, ${event.player.name} saiu` // Substituição
+                        : event.player.name}
+                    </Text>
+                    {renderEventIcon(event)}
+                  </View>
+                  <Text style={styles.eventMinute}>{event.time.elapsed}'</Text>
+                  <View style={styles.eventSide} />
+                </>
+              ) : (
+                <>
+                  <View style={styles.eventSide} />
+                  <Text style={styles.eventMinute}>{event.time.elapsed}'</Text>
+                  <View style={styles.eventSide}>
+                    {renderEventIcon(event)}
+                    <Text style={styles.eventDetailRight}>
+                      {event.type === "Goal" && event.detail === "Normal Goal"
+                        ? `${event.player.name} (assist, ${
+                            event.assist?.name || "sem assist"
+                          })` // Gol normal
+                        : event.type === "Goal" && event.detail === "Own Goal"
+                        ? `${event.player.name} (Gol Contra)` // Gol contra
+                        : event.type === "Goal" && event.detail === "Penalty"
+                        ? `${event.player.name} (Pênalti)` // Pênalti convertido
+                        : event.type === "Goal" &&
+                          (event.detail === "Missed Penalty" ||
+                            event.detail === "Penalty Missed")
+                        ? `${event.player.name} (Pênalti Perdido)` // Pênalti perdido
+                        : event.type === "Var" &&
+                          event.detail === "Goal cancelled"
+                        ? `${event.player.name} (Gol Anulado)` // Gol anulado por VAR
+                        : event.type === "Var" &&
+                          event.detail === "Penalty confirmed"
+                        ? `Pênalti Confirmado` // Pênalti confirmado por VAR
+                        : event.type === "subst" && event.assist
+                        ? `${event.assist.name} entrou, ${event.player.name} saiu` // Substituição
+                        : event.player.name}
+                    </Text>
+                  </View>
+                </>
+              )}
+            </View>
+          );
+        })}
       </View>
     );
   };
@@ -825,15 +838,20 @@ export default function DetalhesDoJogo({ route }) {
                       {confronto.teams.home.name}
                     </Text>
                   </View>
+
                   <View style={styles.ContainResultadoh2}>
-                    <Text style={styles.resultadoAoVivoh2}>
-                      {confronto.goals.home} - {confronto.goals.away}
-                    </Text>
                     <Text style={styles.h2hDate}>
                       {moment(confronto.fixture.date).format("DD/MM/YYYY")}
                     </Text>
+                    <Text style={styles.resultadoAoVivoh2}>
+                      {confronto.goals.home} - {confronto.goals.away}
+                    </Text>
+
                     <Text style={styles.h2hCompetition}>
-                      {confronto.league.name}
+                      {confronto.league.name},
+                    </Text>
+                    <Text style={styles.h2hCompetition}>
+                      Rodada {extrairRodada(confronto.league.round)}
                     </Text>
                   </View>
                   <View style={styles.teamContainerAwayh2}>

@@ -292,15 +292,18 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   eventDetailLeft: {
-    fontSize: 14,
+    fontSize: 12,
     marginRight: 5,
     color: "white", // detalhe do evento em branco
+    textAlign: "left",
+    flexWrap: "wrap",
   },
   eventDetailRight: {
-    fontSize: 14,
+    fontSize: 12,
     marginLeft: 5,
     textAlign: "right",
     color: "white", // detalhe do evento em branco
+    flexWrap: "wrap",
   },
   periodTitle: {
     fontSize: 16,
@@ -372,6 +375,7 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     padding: "1.5%",
     borderRadius: 10,
+    backgroundColor: "#2C2C2E",
   },
   teamContainerHomeh2: {
     flexDirection: "row",
@@ -411,6 +415,7 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     color: "#2f9fa6",
     textAlign: "center",
+    flexWrap: "wrap",
   },
   noH2hText: {
     fontSize: 16,
@@ -429,8 +434,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   imagemEventos: {
-    width: 25,
-    height: 25,
+    width: 20,
+    height: 20,
     marginHorizontal: 5,
   },
 });

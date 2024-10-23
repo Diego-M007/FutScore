@@ -127,43 +127,48 @@ export default function TabelaModalComponent({ leagueId, isVisible, onClose }) {
     <Modal visible={isVisible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalContainer}>
         <ScrollView horizontal={true}>
-          <View style={styles.tableContainer}>
-            <View style={styles.headerRow}>
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>Pos</Text>
-              </View>
-              <View style={styles.headerCell1}>
-                <Text style={styles.headerText}>Time</Text>
-              </View>
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>P</Text>
-              </View>
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>J</Text>
-              </View>
+          <ScrollView
+            style={styles.scrollContainer}
+            contentContainerStyle={styles.scrollContent}
+          >
+            <View style={styles.tableContainer}>
+              <View style={styles.headerRow}>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>Pos</Text>
+                </View>
+                <View style={styles.headerCell1}>
+                  <Text style={styles.headerText}>Time</Text>
+                </View>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>P</Text>
+                </View>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>J</Text>
+                </View>
 
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>Gol</Text>
-              </View>
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>+/-</Text>
-              </View>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>Gol</Text>
+                </View>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>+/-</Text>
+                </View>
 
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>V</Text>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>V</Text>
+                </View>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>E</Text>
+                </View>
+                <View style={styles.headerCell}>
+                  <Text style={styles.headerText}>D</Text>
+                </View>
+                <View style={styles.headerCell1}>
+                  <Text style={styles.headerText}>Últimos Jogos</Text>
+                </View>
               </View>
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>E</Text>
-              </View>
-              <View style={styles.headerCell}>
-                <Text style={styles.headerText}>D</Text>
-              </View>
-              <View style={styles.headerCell1}>
-                <Text style={styles.headerText}>Últimos Jogos</Text>
-              </View>
+              {renderTabela()}
             </View>
-            {renderTabela()}
-          </View>
+          </ScrollView>
         </ScrollView>
 
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>

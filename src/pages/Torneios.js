@@ -15,15 +15,15 @@ import { stylesTorneios } from "../styles/StyleTorneios";
 import { API_FOOTBALL_KEY } from "@env";
 import TorneioCardComponent from "../components/TorneioCardComponent";
 import TxtComponent from "../components/TxtComponent";
-import TabelaModalComponent from "../components/TabelaModalComponent"; // Adicionei o componente de Tabela
+import { useNavigation } from "@react-navigation/native"; // Importando o hook para navegação
 
 export default function Torneios() {
   const [loading, setLoading] = useState(true);
   const [torneios, setTorneios] = useState([]);
   const [paises, setPaises] = useState([]);
   const [expandedPais, setExpandedPais] = useState({});
-  const [isTabelaModalVisible, setTabelaModalVisible] = useState(false); // Estado do modal de tabela
-  const [selectedLigaId, setSelectedLigaId] = useState(null); // Liga ou copa selecionada
+
+  const navigation = useNavigation(); // Hook para navegação
 
   const melhoresLigas = [
     { name: "Premier League", country: "England" },
@@ -37,8 +37,6 @@ export default function Torneios() {
   useEffect(() => {
     const fetchTorneios = async () => {
       try {
-        console.log("API Key:", API_FOOTBALL_KEY); // Verificar se a chave está correta
-
         const response = await axios.get(
           "https://v3.football.api-sports.io/leagues",
           {
@@ -51,13 +49,8 @@ export default function Torneios() {
         );
 
         if (response.data && response.data.response) {
-          console.log("Dados recebidos da API:", response.data.response); // Verificar os dados recebidos
-
           let ligas = response.data.response.filter(
             (league) => league.league && league.league.type === "League"
-          );
-          let copas = response.data.response.filter(
-            (league) => league.league && league.league.type === "Cup"
           );
 
           const paisesUnicos = [
@@ -98,13 +91,7 @@ export default function Torneios() {
           setTorneios(ligasOrdenadas);
         }
       } catch (error) {
-        if (error.response) {
-          console.log("Erro de resposta:", error.response.data);
-        } else if (error.request) {
-          console.log("Nenhuma resposta recebida:", error.request);
-        } else {
-          console.log("Erro desconhecido:", error.message);
-        }
+        console.error("Erro ao buscar torneios:", error.message);
       } finally {
         setLoading(false);
       }
@@ -120,11 +107,8 @@ export default function Torneios() {
     }));
   };
 
-  // Função para abrir o modal de tabela
-  const openTabelaModal = (ligaId) => {
-    console.log("Abrindo modal para a liga:", ligaId); // Verificar se o ID está correto
-    setSelectedLigaId(ligaId); // Define a liga selecionada
-    setTabelaModalVisible(true); // Mostra o modal
+  const openPaginaLiga = (ligaId) => {
+    navigation.navigate("PaginaLiga", { ligaId }); // Navegação direta para a página da liga
   };
 
   if (loading) {
@@ -172,8 +156,7 @@ export default function Torneios() {
                   key={torneio.league.id}
                   imagem={torneio.league.logo}
                   nome={torneio.league.name}
-                  ligaId={torneio.league.id}
-                  onPress={() => openTabelaModal(torneio.league.id)} // Abre o modal de tabela
+                  onPress={() => openPaginaLiga(torneio.league.id)} // Navega diretamente para a página da liga
                   style={stylesTorneios.torneioCard}
                 />
               ))
@@ -211,8 +194,7 @@ export default function Torneios() {
                           key={torneio.league.id}
                           imagem={torneio.league.logo}
                           nome={torneio.league.name}
-                          ligaId={torneio.league.id}
-                          onPress={() => openTabelaModal(torneio.league.id)} // Abre o modal de tabela
+                          onPress={() => openPaginaLiga(torneio.league.id)} // Navega diretamente para a página da liga
                           style={stylesTorneios.torneioCard}
                         />
                       ))}
@@ -227,15 +209,6 @@ export default function Torneios() {
           )}
         </View>
       </ScrollView>
-
-      {/* Modal de Tabela - Só é exibido se uma liga for selecionada */}
-      {selectedLigaId && (
-        <TabelaModalComponent
-          visible={isTabelaModalVisible}
-          onClose={() => setTabelaModalVisible(false)}
-          ligaId={selectedLigaId}
-        />
-      )}
     </SafeAreaView>
   );
 }
