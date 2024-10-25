@@ -820,7 +820,7 @@ export default function DetalhesDoJogo({ route }) {
       )}
       {opcaoSelecionada === "Confrontos" && (
         <View style={styles.container}>
-          <Text style={styles.sectionTitle}>Últimos Confrontos Diretos</Text>
+          <Text style={styles.sectionTitle}>Confrontos Diretos</Text>
           {h2hData && h2hData.length > 0 ? (
             h2hData
               .sort(

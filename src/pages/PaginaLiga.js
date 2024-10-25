@@ -11,9 +11,9 @@ import {
 } from "react-native";
 import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
-import TabelaComponent from "../components/TabelaComponent"; // Importe seu componente de tabela
+import TabelaComponent from "../components/TabelaComponent";
 
-const PaginaLiga = ({ route }) => {
+const PaginaLiga = ({ route, navigation }) => {
   const { ligaId } = route.params;
   const [jogos, setJogos] = useState([]);
   const [artilheiros, setArtilheiros] = useState([]);
@@ -22,10 +22,13 @@ const PaginaLiga = ({ route }) => {
     new Date().getFullYear()
   );
   const [loading, setLoading] = useState(true);
-  const [opcaoSelecionada, setOpcaoSelecionada] = useState("Tabela"); // Adicionando estado para controle das opções
+  const [opcaoSelecionada, setOpcaoSelecionada] = useState("Tabela");
 
   useEffect(() => {
+    if (!ligaId) return;
+
     const carregarDadosDaLiga = async () => {
+      setLoading(true);
       try {
         const responseJogos = await axios.get(
           `https://v3.football.api-sports.io/fixtures`,
@@ -72,15 +75,22 @@ const PaginaLiga = ({ route }) => {
     carregarDadosDaLiga();
   }, [ligaId, anoSelecionado]);
 
+  const formatarTemporada = (ano) => {
+    const proximoAno = ano + 1;
+    return `${ano % 100}/${proximoAno % 100}`;
+  };
+
+  const temporadas = [2024, 2023, 2022];
+
   const renderJogos = () => {
-    if (loading) {
-      return <ActivityIndicator size="large" color="#2f9fa6" />;
-    }
+    if (loading) return <ActivityIndicator size="large" color="#2f9fa6" />;
+    if (jogos.length === 0)
+      return <Text style={styles.noDataText}>Nenhum jogo encontrado.</Text>;
 
     return (
       <FlatList
         data={jogos}
-        keyExtractor={(item) => item.fixture.id.toString()} // Altere para o ID do fixture
+        keyExtractor={(item) => item.fixture.id.toString()}
         renderItem={({ item }) => {
           const statusComponent =
             item.fixture.status.short === "FT" ? (
@@ -95,13 +105,11 @@ const PaginaLiga = ({ route }) => {
             <TouchableOpacity
               key={item.fixture.id}
               style={styles.jogoContainer}
-              onPress={() => {
-                // Navega para a página de detalhes do jogo
-
+              onPress={() =>
                 navigation.navigate("DetalhesDoJogo", {
-                  jogoId: jogos.fixtureId,
-                });
-              }}
+                  jogoId: item.fixture.id,
+                })
+              }
             >
               <Image
                 source={{ uri: item.teams.home.logo }}
@@ -126,9 +134,11 @@ const PaginaLiga = ({ route }) => {
   };
 
   const renderArtilheiros = () => {
-    if (loading) {
-      return <ActivityIndicator size="large" color="#2f9fa6" />;
-    }
+    if (loading) return <ActivityIndicator size="large" color="#2f9fa6" />;
+    if (artilheiros.length === 0)
+      return (
+        <Text style={styles.noDataText}>Nenhum artilheiro encontrado.</Text>
+      );
 
     return (
       <FlatList
@@ -144,9 +154,11 @@ const PaginaLiga = ({ route }) => {
   };
 
   const renderAssistentes = () => {
-    if (loading) {
-      return <ActivityIndicator size="large" color="#2f9fa6" />;
-    }
+    if (loading) return <ActivityIndicator size="large" color="#2f9fa6" />;
+    if (assistentes.length === 0)
+      return (
+        <Text style={styles.noDataText}>Nenhum assistente encontrado.</Text>
+      );
 
     return (
       <FlatList
@@ -166,8 +178,8 @@ const PaginaLiga = ({ route }) => {
       <Text style={styles.title}>Informações da Liga</Text>
 
       <View style={styles.yearSelector}>
-        <Text style={styles.label}>Selecione o ano:</Text>
-        {[2024, 2023, 2022].map((ano) => (
+        <Text style={styles.label}>Selecione a temporada:</Text>
+        {temporadas.map((ano) => (
           <TouchableOpacity
             key={ano}
             style={[
@@ -176,15 +188,15 @@ const PaginaLiga = ({ route }) => {
             ]}
             onPress={() => setAnoSelecionado(ano)}
           >
-            <Text style={styles.yearButtonText}>{ano}</Text>
+            <Text style={styles.yearButtonText}>{formatarTemporada(ano)}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       <ScrollView horizontal={true}>
         {["Tabela", "Jogos", "Artilheiros", "Assistentes"].map((opcao) => (
-          <View style={styles.botoesContainer}>
-            <View style={styles.BtnInfos} key={opcao}>
+          <View style={styles.botoesContainer} key={opcao}>
+            <View style={styles.BtnInfos}>
               <TouchableOpacity
                 style={{
                   backgroundColor:
@@ -272,60 +284,23 @@ const styles = StyleSheet.create({
   botoesContainer: {
     marginBottom: 20,
     flexDirection: "row",
-    justifyContent: "space-around",
   },
   BtnInfos: {
-    marginHorizontal: 5,
-    width: 110,
+    marginRight: 10,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "white",
   },
   section: {
     marginBottom: 20,
   },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+  noDataText: {
     color: "white",
-  },
-  gameText: {
-    color: "white",
-    fontSize: 16,
-    marginVertical: 5,
-  },
-  playerText: {
-    color: "white",
-    fontSize: 16,
-    marginVertical: 5,
-  },
-  jogoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#2C2C2E",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 5,
-  },
-  teamContainerHome: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-  teamContainerAway: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  equipes: {
-    color: "white",
-    fontSize: 16,
-  },
-  statusText: {
-    color: "yellow",
-    fontWeight: "bold",
-    marginHorizontal: 10,
+    textAlign: "center",
+    marginTop: 10,
   },
 });
 

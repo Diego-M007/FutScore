@@ -1,30 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // Importando a navegação
+import { useNavigation } from "@react-navigation/native";
 
-export default function TorneioCardComponent({ imagem, nome, ligaId, tipo }) {
-  const navigation = useNavigation(); // Hook de navegação
+export default function TorneioCardComponent({ imagem, nome, ligaId }) {
+  const navigation = useNavigation();
 
   const handlePress = () => {
-    // Navegando para a página da liga com o ID da liga
-    navigation.navigate("PaginaLiga", { ligaId });
-  };
-
-  // Função para estilizar os últimos jogos (forma)
-  const renderForma = (formaString) => {
-    return formaString.split("").map((result, index) => {
-      let color;
-      if (result === "W") color = "#90EE90"; // Verde claro para vitória
-      else if (result === "D") color = "gray"; // Empate
-      else if (result === "L") color = "red"; // Derrota
-
-      return (
-        <View
-          key={index}
-          style={[styles.formCircle, { backgroundColor: color }]}
-        />
-      );
-    });
+    // Verifica se o ID da liga foi passado antes de navegar
+    if (ligaId) {
+      navigation.navigate("PaginaLiga", { ligaId });
+    } else {
+      console.error("Liga ID não foi passado corretamente.");
+    }
   };
 
   return (
@@ -61,11 +48,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
-  },
-  formCircle: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 2,
   },
 });

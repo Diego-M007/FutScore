@@ -6,6 +6,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import HeaderComponent from "../components/HeaderComponent";
@@ -15,15 +16,14 @@ import { stylesTorneios } from "../styles/StyleTorneios";
 import { API_FOOTBALL_KEY } from "@env";
 import TorneioCardComponent from "../components/TorneioCardComponent";
 import TxtComponent from "../components/TxtComponent";
-import { useNavigation } from "@react-navigation/native"; // Importando o hook para navegação
+import { useNavigation } from "@react-navigation/native";
 
 export default function Torneios() {
   const [loading, setLoading] = useState(true);
   const [torneios, setTorneios] = useState([]);
   const [paises, setPaises] = useState([]);
   const [expandedPais, setExpandedPais] = useState({});
-
-  const navigation = useNavigation(); // Hook para navegação
+  const navigation = useNavigation();
 
   const melhoresLigas = [
     { name: "Premier League", country: "England" },
@@ -92,6 +92,7 @@ export default function Torneios() {
         }
       } catch (error) {
         console.error("Erro ao buscar torneios:", error.message);
+        Alert.alert("Erro", "Não foi possível carregar os torneios.");
       } finally {
         setLoading(false);
       }
@@ -108,8 +109,26 @@ export default function Torneios() {
   };
 
   const openPaginaLiga = (ligaId) => {
-    navigation.navigate("PaginaLiga", { ligaId }); // Navegação direta para a página da liga
+    navigation.navigate("PaginaLiga", { ligaId });
   };
+
+  const renderLigas = (ligas, isCountry = false) =>
+    ligas.length > 0 ? (
+      ligas.map((torneio) => (
+        <TorneioCardComponent
+          key={torneio.league.id}
+          imagem={torneio.league.logo}
+          nome={torneio.league.name}
+          ligaId={torneio.league.id} // Passando o ID da liga corretamente
+        />
+      ))
+    ) : (
+      <Text style={stylesTorneios.noDataText}>
+        {isCountry
+          ? "Nenhuma liga disponível para este país."
+          : "Nenhuma liga disponível."}
+      </Text>
+    );
 
   if (loading) {
     return (
@@ -136,77 +155,48 @@ export default function Torneios() {
       <HeaderComponent />
       <EspacoPropaganda />
       <ScrollView contentContainerStyle={stylesTorneios.Container}>
-        {/* Exibição das Melhores Ligas */}
         <View style={stylesTorneios.section}>
           <TxtComponent
             texto={"Melhores Ligas"}
             styleTxt={stylesTorneios.TextoPrincipal}
           />
-          {torneios.length > 0 ? (
-            torneios
-              .filter((torneio) =>
-                melhoresLigas.some(
-                  (ml) =>
-                    ml.name === torneio.league.name &&
-                    ml.country === torneio.country.name
-                )
+          {renderLigas(
+            torneios.filter((torneio) =>
+              melhoresLigas.some(
+                (ml) =>
+                  ml.name === torneio.league.name &&
+                  ml.country === torneio.country.name
               )
-              .map((torneio) => (
-                <TorneioCardComponent
-                  key={torneio.league.id}
-                  imagem={torneio.league.logo}
-                  nome={torneio.league.name}
-                  onPress={() => openPaginaLiga(torneio.league.id)} // Navega diretamente para a página da liga
-                  style={stylesTorneios.torneioCard}
-                />
-              ))
-          ) : (
-            <Text style={stylesTorneios.noDataText}>
-              Nenhuma liga disponível.
-            </Text>
+            )
           )}
         </View>
 
-        {/* Exibição dos Países */}
         <View style={stylesTorneios.section}>
           <TxtComponent
             texto={"Selecione o País"}
             styleTxt={stylesTorneios.TextoPrincipal}
           />
-          {paises.length > 0 ? (
-            paises.map((pais) => (
-              <View key={pais}>
-                <TouchableOpacity
-                  onPress={() => toggleExpandPais(pais)}
-                  style={[
-                    stylesTorneios.paisButton,
-                    expandedPais[pais] && stylesTorneios.paisButtonSelected,
-                  ]}
-                >
-                  <Text style={stylesTorneios.paisButtonText}>{pais}</Text>
-                </TouchableOpacity>
-                {expandedPais[pais] && (
-                  <View style={stylesTorneios.ligasContainer}>
-                    {torneios
-                      .filter((torneio) => torneio.country.name === pais)
-                      .map((torneio) => (
-                        <TorneioCardComponent
-                          key={torneio.league.id}
-                          imagem={torneio.league.logo}
-                          nome={torneio.league.name}
-                          onPress={() => openPaginaLiga(torneio.league.id)} // Navega diretamente para a página da liga
-                          style={stylesTorneios.torneioCard}
-                        />
-                      ))}
-                  </View>
-                )}
-              </View>
-            ))
-          ) : (
-            <Text style={stylesTorneios.noDataText}>
-              Nenhum país disponível.
-            </Text>
-          )}
+          {paises.map((pais) => (
+            <View key={pais}>
+              <TouchableOpacity
+                onPress={() => toggleExpandPais(pais)}
+                style={[
+                  stylesTorneios.paisButton,
+                  expandedPais[pais] && stylesTorneios.paisButtonSelected,
+                ]}
+              >
+                <Text style={stylesTorneios.paisButtonText}>{pais}</Text>
+              </TouchableOpacity>
+              {expandedPais[pais] && (
+                <View style={stylesTorneios.ligasContainer}>
+                  {renderLigas(
+                    torneios.filter((torneio) => torneio.country.name === pais),
+                    true
+                  )}
+                </View>
+              )}
+            </View>
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>

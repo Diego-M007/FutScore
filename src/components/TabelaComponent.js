@@ -10,11 +10,12 @@ export default function TabelaComponent({ leagueId, ano }) {
 
   useEffect(() => {
     const fetchTabela = async () => {
+      const seasonYear = ano || new Date().getFullYear(); // Ano atual como padrão se "ano" não for fornecido
       try {
         const response = await axios.get(
           `https://v3.football.api-sports.io/standings`,
           {
-            params: { league: leagueId, season: new Date().getFullYear() },
+            params: { league: leagueId, season: seasonYear },
             headers: {
               "x-rapidapi-key": API_FOOTBALL_KEY,
               "x-rapidapi-host": "v3.football.api-sports.io",
@@ -34,7 +35,7 @@ export default function TabelaComponent({ leagueId, ano }) {
     };
 
     fetchTabela();
-  }, [leagueId]);
+  }, [leagueId, ano]); // Inclui "ano" como dependência para atualização ao mudar a temporada
 
   const renderDesempenho = (form) => {
     return form.split("").map((result, index) => {
