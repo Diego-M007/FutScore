@@ -251,6 +251,14 @@ export default function DetalhesDoJogo({ route }) {
     // Navegar para a página da liga passando o ID da liga como parâmetro
     navigation.navigate("PaginaLiga", { ligaId: jogo.league.id });
   };
+  const handleTeamAwayClick = () => {
+    // Navegar para a página da liga passando o ID da liga como parâmetro
+    navigation.navigate("PaginaTime", { timeId: teams.away.id });
+  };
+  const handleTeamHomeClick = () => {
+    // Navegar para a página da liga passando o ID da liga como parâmetro
+    navigation.navigate("PaginaTime", { timeId: teams.home.id });
+  };
 
   const getEventsByPeriod = (period) => {
     switch (period) {
@@ -387,7 +395,7 @@ export default function DetalhesDoJogo({ route }) {
         </TouchableOpacity>
 
         <View style={styles.teamsContainer}>
-          <TouchableOpacity style={styles.team}>
+          <TouchableOpacity onPress={handleTeamHomeClick} style={styles.team}>
             <Image source={{ uri: teams.home.logo }} style={styles.logo} />
             <Text style={styles.teamName}>{teams.home.name}</Text>
           </TouchableOpacity>
@@ -524,7 +532,7 @@ export default function DetalhesDoJogo({ route }) {
               <Text style={styles.teamScore}>{goals.away}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.team}>
+          <TouchableOpacity onPress={handleTeamAwayClick} style={styles.team}>
             {/* Placar time visitante */}
 
             <Image source={{ uri: teams.away.logo }} style={styles.logo} />

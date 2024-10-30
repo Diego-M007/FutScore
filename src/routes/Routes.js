@@ -16,6 +16,7 @@ import PaginaLiga from "../pages/PaginaLiga";
 // Importando Icons
 import { FontAwesome } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
+import PaginaTime from "../pages/PaginaTime";
 
 // Const para o uso do Stack (rotas)
 const Tab = createBottomTabNavigator();
@@ -101,6 +102,14 @@ export default function Routes() {
       <Tab.Screen
         name="PaginaLiga"
         component={PaginaLiga}
+        options={{
+          headerShown: false,
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="PaginaTime"
+        component={PaginaTime}
         options={{
           headerShown: false,
           tabBarButton: () => null,
