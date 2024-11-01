@@ -2,15 +2,30 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Image, ActivityIndicator, ScrollView } from "react-native";
 import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
-import { styles } from "../styles/StyleTabela"; // Certifique-se de ter os estilos corretos
+import { styles } from "../styles/StyleTabela";
+
+// Configuração de vagas manual por liga (exemplo)
+const leaguePositionsConfig = {
+  // Exemplo para o Brasileirão Série A
+  71: { libertadores: 4, sulamericana: 8, rebaixamento: 4 },
+  // Exemplo para La Liga
+  140: { championsLeague: 4, europaLeague: 6, rebaixamento: 3 },
+};
 
 export default function TabelaComponent({ leagueId, ano }) {
   const [tabela, setTabela] = useState([]);
   const [loadingTabela, setLoadingTabela] = useState(true);
 
+  // Verifica a configuração de vagas específica da liga
+  const vagas = leaguePositionsConfig[leagueId] || {
+    libertadores: 4,
+    sulamericana: 8,
+    rebaixamento: 4,
+  };
+
   useEffect(() => {
     const fetchTabela = async () => {
-      const seasonYear = ano || new Date().getFullYear(); // Ano atual como padrão se "ano" não for fornecido
+      const seasonYear = ano || new Date().getFullYear();
       try {
         const response = await axios.get(
           `https://v3.football.api-sports.io/standings`,
@@ -35,24 +50,24 @@ export default function TabelaComponent({ leagueId, ano }) {
     };
 
     fetchTabela();
-  }, [leagueId, ano]); // Inclui "ano" como dependência para atualização ao mudar a temporada
+  }, [leagueId, ano]);
 
   const renderDesempenho = (form) => {
     return form.split("").map((result, index) => {
       let color = "";
-      let translatedResult = ""; // Para armazenar o resultado traduzido
+      let translatedResult = "";
 
       if (result === "W") {
         color = "limegreen";
-        translatedResult = "V"; // Vitória
+        translatedResult = "V";
       }
       if (result === "D") {
         color = "gray";
-        translatedResult = "E"; // Empate
+        translatedResult = "E";
       }
       if (result === "L") {
         color = "red";
-        translatedResult = "D"; // Derrota
+        translatedResult = "D";
       }
 
       return (
@@ -66,6 +81,13 @@ export default function TabelaComponent({ leagueId, ano }) {
     });
   };
 
+  const getPositionColor = (position) => {
+    if (position <= vagas.libertadores) return "limegreen"; // Libertadores
+    if (position <= vagas.sulamericana) return "blue"; // Sul-Americana
+    if (position > tabela.length - vagas.rebaixamento) return "red"; // Rebaixamento
+    return "transparent";
+  };
+
   const renderTabela = () => {
     if (loadingTabela) {
       return <ActivityIndicator size="large" color="#2f9fa6" />;
@@ -77,11 +99,16 @@ export default function TabelaComponent({ leagueId, ano }) {
 
     return tabela.map((team, index) => (
       <View key={team.team.id} style={styles.tableRow}>
-        {/* Colunas em Views Verticais */}
         <View style={styles.tableCell}>
           <Text style={styles.tablePosition}>{index + 1}</Text>
         </View>
         <View style={styles.tableCell1}>
+          <View
+            style={[
+              styles.positionBar,
+              { backgroundColor: getPositionColor(index + 1) },
+            ]}
+          />
           <Image source={{ uri: team.team.logo }} style={styles.teamLogo} />
           <Text style={styles.tableTeamName}>{team.team.name}</Text>
         </View>
@@ -91,7 +118,6 @@ export default function TabelaComponent({ leagueId, ano }) {
         <View style={styles.tableCell}>
           <Text style={styles.teamStats}>{team.all.played}</Text>
         </View>
-
         <View style={styles.tableCell}>
           <Text style={styles.teamStats}>
             {team.all.goals.for}:{team.all.goals.against}
@@ -100,7 +126,6 @@ export default function TabelaComponent({ leagueId, ano }) {
         <View style={styles.tableCell}>
           <Text style={styles.teamStats}>{team.goalsDiff}</Text>
         </View>
-
         <View style={styles.tableCell}>
           <Text style={styles.teamStats}>{team.all.win}</Text>
         </View>
@@ -131,14 +156,12 @@ export default function TabelaComponent({ leagueId, ano }) {
           <View style={styles.headerCell}>
             <Text style={styles.headerText}>J</Text>
           </View>
-
           <View style={styles.headerCell}>
             <Text style={styles.headerText}>Gol</Text>
           </View>
           <View style={styles.headerCell}>
             <Text style={styles.headerText}>+/-</Text>
           </View>
-
           <View style={styles.headerCell}>
             <Text style={styles.headerText}>V</Text>
           </View>

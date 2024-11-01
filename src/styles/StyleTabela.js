@@ -81,4 +81,9 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
   },
+  positionBar: {
+    width: 5,
+    height: "100%",
+    marginRight: 5,
+  },
 });

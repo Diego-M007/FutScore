@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Modal,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -16,9 +17,17 @@ import { API_FOOTBALL_KEY } from "@env";
 const PaginaTime = ({ route, navigation }) => {
   const { timeId } = route.params;
   const [jogos, setJogos] = useState([]);
+  const [teamInfo, setTeamInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [anoSelecionado, setAnoSelecionado] = useState(
     new Date().getFullYear()
+  );
+  const [jogadores, setJogadores] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const temporadas = Array.from(
+    { length: 10 },
+    (_, i) => new Date().getFullYear() - i
   );
 
   useEffect(() => {
@@ -27,6 +36,20 @@ const PaginaTime = ({ route, navigation }) => {
     const carregarDadosDoTime = async () => {
       setLoading(true);
       try {
+        // Requisição para obter informações do time e logo
+        const responseTime = await axios.get(
+          `https://v3.football.api-sports.io/teams`,
+          {
+            params: { id: timeId },
+            headers: {
+              "x-rapidapi-key": API_FOOTBALL_KEY,
+              "x-rapidapi-host": "v3.football.api-sports.io",
+            },
+          }
+        );
+        setTeamInfo(responseTime.data.response[0].team);
+
+        // Requisição para obter os jogos
         const responseJogos = await axios.get(
           `https://v3.football.api-sports.io/fixtures`,
           {
@@ -41,19 +64,58 @@ const PaginaTime = ({ route, navigation }) => {
           (b, a) => new Date(b.fixture.date) - new Date(a.fixture.date)
         );
         setJogos(jogosOrdenados);
+
+        // Requisição para obter a lista de jogadores do time
+        let todosJogadores = [];
+        let page = 1; // Começa na página 1
+        let totalJogadores = 0;
+
+        do {
+          const responseJogadores = await axios.get(
+            `https://v3.football.api-sports.io/players`,
+            {
+              params: {
+                team: timeId,
+                season: anoSelecionado,
+                page: page,
+              },
+              headers: {
+                "x-rapidapi-key": API_FOOTBALL_KEY,
+                "x-rapidapi-host": "v3.football.api-sports.io",
+              },
+            }
+          );
+
+          const jogadoresPagina = responseJogadores.data.response.map(
+            (item) => item.player
+          );
+
+          // Adiciona os jogadores da página atual ao array total de jogadores
+          todosJogadores = [...todosJogadores, ...jogadoresPagina];
+          totalJogadores = responseJogadores.data.paging.total;
+
+          page++;
+        } while ((page - 1) * 20 < totalJogadores); // Ajusta a condição para o total
+
+        // Atualiza o estado com todos os jogadores
+        setJogadores(todosJogadores);
       } catch (error) {
         console.error("Erro ao carregar dados do time:", error);
       } finally {
         setLoading(false);
       }
     };
-
     carregarDadosDoTime();
   }, [timeId, anoSelecionado]);
 
   const extrairRodada = (roundString) => {
     const rodada = roundString.match(/\d+/);
     return rodada ? rodada[0] : "-";
+  };
+
+  const selecionarAno = (ano) => {
+    setAnoSelecionado(ano);
+    setModalVisible(false);
   };
 
   const renderJogo = ({ item }) => {
@@ -65,11 +127,9 @@ const PaginaTime = ({ route, navigation }) => {
 
     if (statusDoJogo === "NS") {
       resultadoOuHorario = (
-        // Se o jogo não iniciou, verifica o horário
         <Text style={styles.h2hHorario}>{horarioFormatado}</Text>
       );
     } else if (statusDoJogo === "FT") {
-      // Se o jogo terminou, exibe o resultado final
       resultadoOuHorario = (
         <Text style={styles.resultado}>
           {item.goals.home} - {item.goals.away}
@@ -81,7 +141,6 @@ const PaginaTime = ({ route, navigation }) => {
         <Text style={styles.h2hHorarioDefinir}>A definir</Text>
       );
     } else {
-      // Caso contrário, exibe o status em andamento ou ao vivo
       resultadoOuHorario = (
         <Text style={styles.aoVivo}>
           {statusDoJogo === "LIVE" ? "Ao Vivo" : statusDoJogo}
@@ -118,34 +177,89 @@ const PaginaTime = ({ route, navigation }) => {
     );
   };
 
+  const renderJogador = ({ item }) => (
+    <View style={styles.jogadorContainer}>
+      <Image source={{ uri: item.photo }} style={styles.jogadorFoto} />
+      <View style={{ flexDirection: "column" }}>
+        <Text style={styles.jogadorNome}>{item.name}</Text>
+        <Text style={styles.jogadorIdade}>Idade: {item.age}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>
-        {jogos.length > 0 ? jogos[0].teams.home.name : "Informações do Time"}
-      </Text>
+      {teamInfo && (
+        <View style={styles.header}>
+          <Image
+            source={{
+              uri: `https://media.api-sports.io/football/teams/${teamInfo.id}.png`,
+            }}
+            style={styles.teamLogo}
+          />
+          <Text style={styles.title}>{teamInfo.name}</Text>
+        </View>
+      )}
+
       <View style={styles.yearSelector}>
-        <Text style={styles.label}>Selecione a temporada:</Text>
-        {[2024, 2023, 2022].map((ano) => (
-          <TouchableOpacity
-            key={ano}
-            style={[
-              styles.yearButton,
-              anoSelecionado === ano && styles.yearButtonSelected,
-            ]}
-            onPress={() => setAnoSelecionado(ano)}
-          >
-            <Text style={styles.yearButtonText}>{ano}</Text>
-          </TouchableOpacity>
-        ))}
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text style={styles.selectedYearText}>
+            Temporada: {anoSelecionado}
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Modal para selecionar temporada */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Selecione a Temporada</Text>
+            {temporadas.map((ano) => (
+              <TouchableOpacity
+                key={ano}
+                style={styles.modalOption}
+                onPress={() => selecionarAno(ano)}
+              >
+                <Text style={styles.modalOptionText}>{ano}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       {loading ? (
         <ActivityIndicator size="large" color="#2f9fa6" />
       ) : (
-        <FlatList
-          data={jogos}
-          keyExtractor={(item) => item.fixture.id.toString()}
-          renderItem={renderJogo}
-        />
+        <>
+          <Text style={styles.sectionTitle}>Próximos Jogos</Text>
+          <FlatList
+            data={jogos}
+            keyExtractor={(item) => item.fixture.id.toString()}
+            renderItem={renderJogo}
+          />
+
+          <Text style={styles.sectionTitle}>Jogadores</Text>
+          <FlatList
+            data={jogadores}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderJogador}
+          />
+        </>
       )}
     </ScrollView>
   );
@@ -157,10 +271,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  header: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  teamLogo: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    color: "white",
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginVertical: 10,
     color: "white",
   },
   yearSelector: {
@@ -185,6 +313,33 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  jogadorContainer: {
+    backgroundColor: "#1f1f1f",
+    padding: 10,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 5,
+  },
+  jogadorFoto: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  jogadorNome: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  jogadorIdade: {
+    color: "gray",
+    fontSize: 14,
+  },
+  jogadorPosicao: {
+    color: "gray",
+    fontSize: 14,
   },
   jogoContainer: {
     borderWidth: 1,
@@ -247,6 +402,49 @@ const styles = StyleSheet.create({
   h2hHorarioDefinir: {
     fontSize: 13,
     color: "orange",
+  },
+  yearSelector: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  selectedYearText: {
+    fontSize: 16,
+    color: "#2f9fa6",
+    textDecorationLine: "underline",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  modalOption: {
+    paddingVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: "#2f9fa6",
+  },
+  modalCloseButton: {
+    marginTop: 15,
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: "#2f9fa6",
   },
 });
 

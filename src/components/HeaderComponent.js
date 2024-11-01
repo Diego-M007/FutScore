@@ -1,18 +1,33 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet, Platform, TextInput } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import ImgComponent from "./ImgComponent";
 import BotaoImagemComponent from "./BotãoImagemComponent";
 
-export default function HeaderComponent({ onDateChange }) {
+export default function HeaderComponent({ onDateChange, onSearch }) {
   const [showPicker, setShowPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Estado para armazenar a data selecionada
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleDateChange = (event, newSelectedDate) => {
-    const currentDate = newSelectedDate || selectedDate; // Usa a data atual ou a data selecionada
-    setShowPicker(Platform.OS === "ios"); // Fecha o picker no Android
-    setSelectedDate(currentDate); // Atualiza a data selecionada localmente
-    onDateChange(currentDate); // Passa a nova data para o componente pai
+    const currentDate = newSelectedDate || selectedDate;
+    setShowPicker(Platform.OS === "ios");
+    setSelectedDate(currentDate);
+    onDateChange(currentDate);
+  };
+
+  const handleSearchToggle = () => {
+    setSearchMode(!searchMode);
+    setSearchQuery(""); // Limpa a pesquisa ao fechar o campo
+    if (searchMode) {
+      onSearch(""); // Reseta a pesquisa ao fechar
+    }
+  };
+
+  const handleSearchInputChange = (text) => {
+    setSearchQuery(text);
+    onSearch(text); // Chama a função de pesquisa sempre que o texto é alterado
   };
 
   return (
@@ -21,23 +36,39 @@ export default function HeaderComponent({ onDateChange }) {
         name={"calendar-alt"}
         size={25}
         color={"white"}
-        setShowPicker={() => setShowPicker(true)} // Abre o picker quando o botão de calendário é clicado
+        setShowPicker={() => setShowPicker(true)}
       />
 
-      <View style={styles.DivLogo}>
-        <ImgComponent
-          ImageUri={require("../assets/Images/LogoFutScore.png")}
-          ImageStyle={styles.futscore}
+      {searchMode ? (
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar..."
+          placeholderTextColor="#aaa"
+          value={searchQuery}
+          onChangeText={handleSearchInputChange}
         />
-      </View>
-      <BotaoImagemComponent name={"search"} size={25} color={"white"} />
+      ) : (
+        <View style={styles.DivLogo}>
+          <ImgComponent
+            ImageUri={require("../assets/Images/LogoFutScore.png")}
+            ImageStyle={styles.futscore}
+          />
+        </View>
+      )}
+
+      <BotaoImagemComponent
+        name={"search"}
+        size={25}
+        color={"white"}
+        onPress={handleSearchToggle}
+      />
 
       {showPicker && (
         <DateTimePicker
-          value={selectedDate} // Inicializa o picker com a data selecionada
+          value={selectedDate}
           mode="date"
           display="calendar"
-          onChange={handleDateChange} // Atualiza a data ao selecionar uma nova
+          onChange={handleDateChange}
         />
       )}
     </View>
@@ -69,5 +100,13 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     zIndex: -1,
     width: "50%",
+  },
+  searchInput: {
+    flex: 1,
+    height: "80%",
+    color: "white",
+    backgroundColor: "#1C1C1E",
+    borderRadius: 5,
+    paddingHorizontal: 10,
   },
 });

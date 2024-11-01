@@ -1,15 +1,10 @@
-// Partidas.js
 import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
   ScrollView,
   StyleSheet,
-  Text,
   View,
-  TextInput,
-  TouchableOpacity,
-  Modal,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
@@ -18,17 +13,14 @@ import HeaderComponent from "../components/HeaderComponent";
 import { stylesPartidas } from "../styles/StylePartidas";
 import { API_FOOTBALL_KEY } from "@env";
 import TxtComponent from "../components/TxtComponent";
-import EspacoPropaganda from "../components/PropagandoComponent";
+import EspaçoPropaganda from "../components/PropagandoComponent";
 import { Video, ResizeMode } from "expo-av";
 import LigasEspecificasComponent from "../components/PrincipaisLigasComponente";
-import SearchScreen from "./SearchScreen";
 
 export default function Partidas() {
   const [jogosPorPais, setJogosPorPais] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [searchQuery, setSearchQuery] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
   const timezone = "America/Sao_Paulo";
 
   useEffect(() => {
@@ -101,23 +93,6 @@ export default function Partidas() {
     fetchJogos(selectedDate);
   }, [selectedDate]);
 
-  const filteredJogos = Object.keys(jogosPorPais).reduce((acc, pais) => {
-    const competicoes = jogosPorPais[pais].filter(
-      (competicao) =>
-        competicao.nome.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        competicao.jogos.some(
-          (jogo) =>
-            jogo.timeCasa.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            jogo.timeVisitante.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    );
-
-    if (competicoes.length > 0) {
-      acc[pais] = competicoes;
-    }
-    return acc;
-  }, {});
-
   if (loading) {
     return (
       <SafeAreaView style={stylesPartidas.all}>
@@ -144,19 +119,7 @@ export default function Partidas() {
     <SafeAreaView style={stylesPartidas.all}>
       <StatusBar barStyle="light-content" />
       <HeaderComponent onDateChange={setSelectedDate} />
-      <EspacoPropaganda />
-
-      <View style={styles.searchHeader}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Pesquisar times, competições..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text style={styles.searchIcon}>🔍</Text>
-        </TouchableOpacity>
-      </View>
+      <EspaçoPropaganda />
 
       <ScrollView contentContainerStyle={stylesPartidas.Container}>
         <TxtComponent
@@ -164,12 +127,8 @@ export default function Partidas() {
           styleTxt={stylesPartidas.TextoPrincipal}
         />
 
-        <CompeticoesPorPaisComponent jogosPorPais={filteredJogos} />
+        <CompeticoesPorPaisComponent jogosPorPais={jogosPorPais} />
       </ScrollView>
-
-      <Modal visible={modalVisible} animationType="slide">
-        <SearchScreen onClose={() => setModalVisible(false)} />
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -181,25 +140,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   video: {
-    width: "100%",
+    width: "1550%",
     height: "50%",
-  },
-  searchHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 15,
-    marginVertical: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-  searchIcon: {
-    fontSize: 24,
   },
 });
