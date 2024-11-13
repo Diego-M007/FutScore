@@ -353,6 +353,12 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.8)",
     borderRadius: 20,
   },
+  playerImage: {
+    width: 30, // ajuste o tamanho conforme necessário
+    height: 30, // ajuste o tamanho conforme necessário
+    borderRadius: 15, // para deixar a imagem redonda
+    marginRight: 10,
+  },
   playerName: {
     fontSize: 10,
     textAlign: "center",

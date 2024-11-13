@@ -10,7 +10,7 @@ import Favoritos from "../pages/Favoritos";
 import Splash from "../pages/splash";
 import Login from "../pages/Login";
 import DetalhesDoJogo from "../pages/DetalhesDoJogo";
-import Album from "../pages/Album";
+import SpinRoleta from "../pages/SpinRoleta";
 import PaginaLiga from "../pages/PaginaLiga";
 
 // Importando Icons
@@ -158,8 +158,8 @@ export default function Routes() {
         }}
       />
       <Tab.Screen
-        name="Album"
-        component={Album}
+        name="SpinRoleta"
+        component={SpinRoleta}
         options={{
           headerShown: false,
           title: "",

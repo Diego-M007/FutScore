@@ -677,6 +677,24 @@ export default function DetalhesDoJogo({ route }) {
                       return "Impedimentos";
                     case "Fouls":
                       return "Faltas";
+                    case "Blocked Shots":
+                      return "Chutes Bloqueados";
+                    case "Shots insidebox":
+                      return "Chutes dentro da área";
+                    case "Shots outsidebox":
+                      return "Chutes fora da área";
+                    case "Yellow Cards":
+                      return "Cartões Amarelos";
+                    case "Red Cards":
+                      return "Cartões Vermelhos";
+                    case "Goalkeeper Saves":
+                      return "Defesas do Goleiro";
+                    case "Total Passes":
+                      return "Passes Totais";
+                    case "Passes accurate":
+                      return "Passes Certos";
+                    case "expected_goals":
+                      return "Gols Esperados";
                     default:
                       return tipo;
                   }
@@ -689,7 +707,10 @@ export default function DetalhesDoJogo({ route }) {
                         : valorTimeCasa}
                     </Text>
                     <View style={styles.ContainerStats}>
-                      <Text style={styles.statsText}>{stat.type}</Text>
+                      <Text style={styles.statsText}>
+                        {traduzirEstatistica(stat.type)}
+                      </Text>
+
                       <View style={styles.progressBarContainer}>
                         <View
                           style={[
@@ -773,9 +794,15 @@ export default function DetalhesDoJogo({ route }) {
               {lineups &&
                 lineups.length > 0 &&
                 lineups[0].startXI.map((player, index) => (
-                  <Text key={index} style={styles.starterPlayer}>
-                    {player.player.name}
-                  </Text>
+                  <View key={index} style={styles.playerContainer}>
+                    <Image
+                      source={{ uri: player.player.photo }}
+                      style={styles.playerImage}
+                    />
+                    <Text style={styles.starterPlayer}>
+                      {player.player.name}
+                    </Text>
+                  </View>
                 ))}
 
               <View style={styles.teamLineup}>
@@ -783,9 +810,15 @@ export default function DetalhesDoJogo({ route }) {
                 {lineups &&
                   lineups.length > 0 &&
                   lineups[0].substitutes.map((player, index) => (
-                    <Text key={index} style={styles.substitutePlayer}>
-                      {player.player.name}
-                    </Text>
+                    <View key={index} style={styles.playerContainer}>
+                      <Image
+                        source={{ uri: player.player.photo }}
+                        style={styles.playerImage}
+                      />
+                      <Text style={styles.substitutePlayer}>
+                        {player.player.name}
+                      </Text>
+                    </View>
                   ))}
               </View>
               <Text style={styles.teamName2}>
