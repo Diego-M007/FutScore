@@ -165,9 +165,15 @@ const PaginaLiga = ({ route, navigation }) => {
         data={artilheiros}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <Text
-            style={styles.playerText}
-          >{`${item.player.name} - ${item.statistics[0].goals.total} gols`}</Text>
+          <View style={styles.playerContainer}>
+            <Image
+              source={{ uri: item.player.photo }}
+              style={styles.playerImage}
+            />
+            <Text style={styles.playerText}>
+              {`${item.player.name} - ${item.statistics[0].goals.total} gols`}
+            </Text>
+          </View>
         )}
       />
     );
@@ -185,9 +191,15 @@ const PaginaLiga = ({ route, navigation }) => {
         data={assistentes}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <Text
-            style={styles.playerText}
-          >{`${item.player.name} - ${item.statistics[0].goals.assists} assistências`}</Text>
+          <View style={styles.playerContainer}>
+            <Image
+              source={{ uri: item.player.photo }}
+              style={styles.playerImage}
+            />
+            <Text style={styles.playerText}>
+              {`${item.player.name} - ${item.statistics[0].goals.assists} assistências`}
+            </Text>
+          </View>
         )}
       />
     );
@@ -428,6 +440,17 @@ const styles = StyleSheet.create({
     color: "#888",
     textAlign: "center",
     marginTop: 20,
+  },
+  playerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  playerImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
   },
 });
 
