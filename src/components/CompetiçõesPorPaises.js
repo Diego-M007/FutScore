@@ -9,6 +9,7 @@ import {
 import CompeticaoCardComponent from "./CompeticaoCardComponent";
 import Flag from "react-native-flags";
 
+// Mapeamento dos nomes dos países e seus respectivos códigos de bandeira
 const countryNames = {
   Afghanistan: "Afeganistão",
   Albania: "Albânia",
@@ -411,75 +412,86 @@ const countryCodes = {
   World: "WLD",
 };
 
+// Componente que renderiza as competições por país
 const CompeticoesPorPaisComponent = ({ jogosPorPais }) => {
+  // Estado para controlar quais países estão expandidos
   const [expandedCountries, setExpandedCountries] = useState({});
 
+  // Função para alternar o estado de expandir/colapsar para um país específico
   const toggleExpand = (pais) => {
     setExpandedCountries((prevState) => ({
+      // Inverte o estado de expandido para o país
       ...prevState,
       [pais]: !prevState[pais],
     }));
   };
 
+  // Ordena os países em ordem alfabética, usando o nome traduzido, se disponível
   const sortedCountries = Object.keys(jogosPorPais).sort((a, b) => {
-    const nameA = countryNames[a] || a;
+    const nameA = countryNames[a] || a; // Nome do país ou o próprio código, caso não tenha tradução
     const nameB = countryNames[b] || b;
-    return nameA.localeCompare(nameB);
+    return nameA.localeCompare(nameB); // Comparação alfabética
   });
 
   return (
     <View style={styles.container}>
+      {/* Lista de países com competições */}
       <FlatList
-        data={sortedCountries}
-        keyExtractor={(item) => item}
+        data={sortedCountries} // Dados a serem exibidos, que são os países ordenados
+        keyExtractor={(item) => item} // Cada item é único baseado no nome do país
         renderItem={({ item: pais }) => {
-          const competicoes = jogosPorPais[pais];
-          const isExpanded = expandedCountries[pais];
-          const translatedName = countryNames[pais] || pais;
-          const flagCode = countryCodes[pais] || "UN"; // Usa um código padrão para bandeiras não disponíveis
+          const competicoes = jogosPorPais[pais]; // Competicoes do país
+          const isExpanded = expandedCountries[pais]; // Estado de expandido para o país
+          const translatedName = countryNames[pais] || pais; // Nome traduzido do país
+          const flagCode = countryCodes[pais] || "UN"; // Código da bandeira ou código padrão "UN"
 
-          // Calcular o total de jogos e jogos finalizados
+          // Calcula o total de jogos e jogos finalizados
           const totalJogos = competicoes.reduce(
-            (acc, competicao) => acc + competicao.jogos.length,
+            (acc, competicao) => acc + competicao.jogos.length, // Soma os jogos de todas as competições
             0
           );
           const totalFinalizados = competicoes.reduce(
             (acc, competicao) =>
-              acc + competicao.jogos.filter((jogo) => jogo.finalizado).length,
+              acc + competicao.jogos.filter((jogo) => jogo.finalizado).length, // Soma os jogos finalizados
             0
           );
 
           return (
             <View style={styles.paisContainer}>
+              {/* Cabeçalho do país com bandeira, nome e número de jogos */}
               <TouchableOpacity onPress={() => toggleExpand(pais)}>
                 <View style={styles.paisHeader}>
+                  {/* Exibe a bandeira do país usando o código */}
                   <Flag code={flagCode} size={32} />
+                  {/* Exibe o nome do país */}
                   <Text style={styles.paisTitulo}>{translatedName}</Text>
                   <Text
                     style={{
                       fontSize: 13,
                       fontWeight: "bold",
                       color: "#fff",
-                      marginLeft: "10%",
+                      marginLeft: "10%", // Estilo de espaçamento
                     }}
                   >
-                    {totalJogos} Jogos
+                    {totalJogos} Jogos {/* Exibe o total de jogos */}
                   </Text>
                 </View>
               </TouchableOpacity>
+
+              {/* Se o país estiver expandido, renderiza as competições */}
               {isExpanded &&
                 competicoes.map((competicao, index) => {
-                  const totalJogosCompeticao = competicao.jogos.length;
+                  const totalJogosCompeticao = competicao.jogos.length; // Total de jogos da competição
                   const finalizados = competicao.jogos.filter(
-                    (jogo) => jogo.finalizado
+                    (jogo) => jogo.finalizado // Filtra os jogos finalizados
                   ).length;
                   return (
                     <CompeticaoCardComponent
                       key={index}
-                      imagem={competicao.imagem}
-                      nome={competicao.nome}
+                      imagem={competicao.imagem} // Imagem da competição
+                      nome={competicao.nome} // Nome da competição
                       quantidadeJogos={totalJogosCompeticao} // Total de jogos
-                      jogos={competicao.jogos}
+                      jogos={competicao.jogos} // Lista de jogos
                     />
                   );
                 })}
@@ -501,20 +513,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
     borderWidth: 0.5,
-    borderColor: "#2f9fa6",
+    borderColor: "#2f9fa6", // Cor da borda
     borderRadius: 8,
     padding: 10,
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#2C2C2E", // Cor de fundo
   },
   paisHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row", // Alinha a bandeira e o nome do país em linha
+    alignItems: "center", // Alinha os itens verticalmente no centro
   },
   paisTitulo: {
     fontSize: 18,
     fontWeight: "bold",
-    marginLeft: 10,
-    color: "#fff",
+    marginLeft: 10, // Espaço entre a bandeira e o nome do país
+    color: "#fff", // Cor do texto
   },
 });
 

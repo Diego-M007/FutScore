@@ -5,48 +5,54 @@ import moment from "moment-timezone";
 import axios from "axios";
 import { API_FOOTBALL_KEY } from "@env";
 
-// Função para formatar o horário
+// Função para formatar o horário no formato HH:mm
 const formatHorario = (horario) => {
   const [horas, minutos] = horario.split(":");
   return `${horas}:${minutos}`;
 };
 
-// Função para buscar status de um único jogo por ID
+// Função para buscar status de um jogo específico
 const pegarStatusDoJogo = async (fixtureId) => {
   try {
+    // Requisição para API de futebol
     const response = await axios.get(
       `https://v3.football.api-sports.io/fixtures`,
       {
         params: { id: fixtureId, timezone: "America/Sao_Paulo" },
         headers: {
-          "x-rapidapi-key": API_FOOTBALL_KEY,
+          "x-rapidapi-key": API_FOOTBALL_KEY, // Chave da API
           "x-rapidapi-host": "v3.football.api-sports.io",
         },
       }
     );
 
+    // Extrai os dados de status do jogo
     const jogo = response.data.response[0];
     const status = {
-      status: jogo.fixture.status.short,
-      minutos: jogo.fixture.status.elapsed,
-      penaltyScore: jogo.score.penalty ? jogo.score.penalty : null, // Adiciona o score dos pênaltis
+      status: jogo.fixture.status.short, // Status curto do jogo
+      minutos: jogo.fixture.status.elapsed, // Minutos do jogo
+      penaltyScore: jogo.score.penalty ? jogo.score.penalty : null, // Placar de pênaltis, se houver
     };
 
     return { [fixtureId]: status };
   } catch (error) {
     console.error("Erro ao buscar status do jogo:", error);
+    // Retorna erro se falhar
     return {
       [fixtureId]: { status: "Erro", minutos: null, penaltyScore: null },
     };
   }
 };
 
+// Componente para exibir os jogos do dia
 const JogosDoDiaComponent = ({ jogos }) => {
-  const [statuses, setStatuses] = useState({});
-  const navigation = useNavigation();
+  const [statuses, setStatuses] = useState({}); // Estado para armazenar os status dos jogos
+  const navigation = useNavigation(); // Hook de navegação
 
+  // useEffect para buscar status ao carregar o componente e atualizar a cada 60 segundos
   useEffect(() => {
     if (jogos && jogos.length > 0) {
+      // Busca o status de todos os jogos
       jogos.forEach(async (jogo) => {
         const statusMap = await pegarStatusDoJogo(jogo.fixtureId);
         setStatuses((prevStatuses) => ({
@@ -55,6 +61,7 @@ const JogosDoDiaComponent = ({ jogos }) => {
         }));
       });
 
+      // Atualiza o status a cada 60 segundos
       const intervalo = setInterval(() => {
         jogos.forEach(async (jogo) => {
           const statusMap = await pegarStatusDoJogo(jogo.fixtureId);
@@ -65,20 +72,25 @@ const JogosDoDiaComponent = ({ jogos }) => {
         });
       }, 60000);
 
+      // Limpa o intervalo quando o componente for desmontado
       return () => clearInterval(intervalo);
     }
   }, [jogos]);
 
+  // Função que retorna o JSX para exibir cada jogo
   const renderJogo = (jogo) => {
+    // Formata a data e hora do jogo
     const dataHoraInicio = moment
       .tz(jogo.dataHoraInicio, "America/Sao_Paulo")
       .format("DD/MM/YYYY HH:mm");
 
+    // Obtém o status do jogo do estado
     const statusInfo = statuses[jogo.fixtureId] || {};
     const statusDoJogo = statusInfo.status || "Carregando...";
     const minutos = statusInfo.minutos || null;
 
     let statusComponent;
+    // Define o componente a ser exibido com base no status
     if (statusDoJogo === "PST") {
       statusComponent = <Text style={styles.adiado}>Jogo adiado</Text>;
     } else if (statusDoJogo === "CANC") {
@@ -94,6 +106,7 @@ const JogosDoDiaComponent = ({ jogos }) => {
     } else if (statusDoJogo === "WO") {
       statusComponent = <Text style={styles.adiado}>W.O.</Text>;
     } else if (["LIVE", "1H", "2H"].includes(statusDoJogo)) {
+      // Exibe o minuto e o resultado ao vivo
       statusComponent = (
         <View style={styles.ContainResultado}>
           <Text style={styles.aoVivo}>{`${minutos ? `${minutos}'` : ""}`}</Text>
@@ -101,6 +114,7 @@ const JogosDoDiaComponent = ({ jogos }) => {
         </View>
       );
     } else if (statusDoJogo === "ET") {
+      // Exibe o minuto e o resultado no tempo extra
       statusComponent = (
         <View style={styles.ContainResultado}>
           <Text style={styles.aoVivo}>
@@ -110,6 +124,7 @@ const JogosDoDiaComponent = ({ jogos }) => {
         </View>
       );
     } else if (statusDoJogo === "AET" || statusDoJogo === "PEN") {
+      // Exibe os pênaltis se o jogo estiver em prorrogação ou pênaltis
       statusComponent = (
         <View style={styles.ContainResultado}>
           <Text style={styles.aoVivo}>PEN</Text>
@@ -122,6 +137,7 @@ const JogosDoDiaComponent = ({ jogos }) => {
         </View>
       );
     } else if (statusDoJogo === "BT" || statusDoJogo === "HT") {
+      // Exibe "Intervalo" se o jogo estiver no intervalo
       statusComponent = (
         <View style={styles.ContainResultado}>
           <Text style={{ color: "orange", fontSize: 8 }}>Intervalo</Text>
@@ -129,8 +145,10 @@ const JogosDoDiaComponent = ({ jogos }) => {
         </View>
       );
     } else if (statusDoJogo === "FT") {
+      // Exibe o resultado final
       statusComponent = <Text style={styles.resultado}>{jogo.resultado}</Text>;
     } else {
+      // Exibe o horário se o jogo ainda não começou
       statusComponent = (
         <Text style={styles.horario}>{formatHorario(jogo.horario)}</Text>
       );
@@ -141,9 +159,11 @@ const JogosDoDiaComponent = ({ jogos }) => {
         key={jogo.fixtureId}
         style={styles.jogoContainer}
         onPress={() => {
+          // Navega para a tela de detalhes do jogo
           navigation.navigate("DetalhesDoJogo", { jogoId: jogo.fixtureId });
         }}
       >
+        {/* Exibe os logos dos times */}
         <Image source={{ uri: jogo.logoCasa }} style={styles.logo} />
         <View style={styles.teamContainerHome}>
           <Text style={styles.equipes}>{jogo.timeCasa}</Text>
@@ -157,20 +177,19 @@ const JogosDoDiaComponent = ({ jogos }) => {
     );
   };
 
+  // Retorna o JSX para todos os jogos
   return <View style={styles.container}>{jogos.map(renderJogo)}</View>;
 };
 
+// Estilos do componente
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
+  container: { width: "100%" },
   jogoContainer: {
     borderWidth: 1,
     borderColor: "#2f9fa6",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "100%",
     marginTop: 10,
     padding: "1.5%",
     borderRadius: 10,
@@ -189,16 +208,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: "wrap",
   },
-  logo: {
-    width: 35,
-    height: 35,
-    borderRadius: 10,
-    resizeMode: "contain",
-  },
-  equipes: {
-    fontSize: 13,
-    color: "white",
-  },
+  logo: { width: 35, height: 35, borderRadius: 10, resizeMode: "contain" },
+
+  equipes: { fontSize: 13, color: "white" },
+
   horario: {
     fontSize: 15,
     color: "white",
@@ -231,21 +244,27 @@ const styles = StyleSheet.create({
   },
   aoVivo: {
     fontSize: 10,
-    color: "red",
-    marginRight: "2%",
+    color: "orange",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  resultadoAoVivo: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  penaltyScore: {
+    fontSize: 12,
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   ContainResultado: {
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: "#2f9fa6",
-    paddingHorizontal: "2%",
-    textAlign: "center",
-    margin: "3%",
-    flexDirection: "column",
-    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
-  resultadoAoVivo: { fontSize: 16, color: "white" },
-  penaltyScore: { fontSize: 12, color: "yellow", marginTop: 2 },
 });
 
 export default JogosDoDiaComponent;
