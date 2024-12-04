@@ -112,7 +112,7 @@ export default function TabelaComponent({ leagueId, ano }) {
     return tabela.map((team, index) => (
       <View key={team.team.id} style={styles.tableRow}>
         <View style={styles.tableCell}>
-          <Text style={styles.tablePosition}>{index + 1}</Text>{" "}
+          <Text style={styles.tablePosition}>{index + 1}</Text>
           {/* Exibe a posição */}
         </View>
         <View style={styles.tableCell1}>
@@ -122,42 +122,42 @@ export default function TabelaComponent({ leagueId, ano }) {
               { backgroundColor: getPositionColor(index + 1) }, // Cor da posição
             ]}
           />
-          <Image source={{ uri: team.team.logo }} style={styles.teamLogo} />{" "}
+          <Image source={{ uri: team.team.logo }} style={styles.teamLogo} />
           {/* Exibe o logo do time */}
-          <Text style={styles.tableTeamName}>{team.team.name}</Text>{" "}
+          <Text style={styles.tableTeamName}>{team.team.name}</Text>
           {/* Exibe o nome do time */}
         </View>
         <View style={styles.tableCell}>
-          <Text style={styles.tablePoints}>{team.points}</Text>{" "}
+          <Text style={styles.tablePoints}>{team.points}</Text>
           {/* Exibe os pontos */}
         </View>
         <View style={styles.tableCell}>
-          <Text style={styles.teamStats}>{team.all.played}</Text>{" "}
+          <Text style={styles.teamStats}>{team.all.played}</Text>
           {/* Exibe o número de jogos */}
         </View>
         <View style={styles.tableCell}>
           <Text style={styles.teamStats}>
-            {team.all.goals.for}:{team.all.goals.against}{" "}
+            {team.all.goals.for}:{team.all.goals.against}
             {/* Exibe o placar de gols */}
           </Text>
         </View>
         <View style={styles.tableCell}>
-          <Text style={styles.teamStats}>{team.goalsDiff}</Text>{" "}
+          <Text style={styles.teamStats}>{team.goalsDiff}</Text>
           {/* Exibe a diferença de gols */}
         </View>
         <View style={styles.tableCell}>
-          <Text style={styles.teamStats}>{team.all.win}</Text>{" "}
+          <Text style={styles.teamStats}>{team.all.win}</Text>
           {/* Exibe o número de vitórias */}
         </View>
         <View style={styles.tableCell}>
-          <Text style={styles.teamStats}>{team.all.draw}</Text>{" "}
+          <Text style={styles.teamStats}>{team.all.draw}</Text>
           {/* Exibe o número de empates */}
         </View>
         <View style={styles.tableCell}>
-          <Text style={styles.teamStats}>{team.all.lose}</Text>{" "}
+          <Text style={styles.teamStats}>{team.all.lose}</Text>
           {/* Exibe o número de derrotas */}
         </View>
-        <View style={styles.formContainer}>{renderDesempenho(team.form)}</View>{" "}
+        <View style={styles.formContainer}>{renderDesempenho(team.form)}</View>
         {/* Exibe os últimos resultados */}
       </View>
     ));
@@ -165,7 +165,6 @@ export default function TabelaComponent({ leagueId, ano }) {
 
   return (
     <ScrollView horizontal={true}>
-      {" "}
       {/* Permite rolagem horizontal da tabela */}
       <View style={styles.tableContainer}>
         <View style={styles.headerRow}>

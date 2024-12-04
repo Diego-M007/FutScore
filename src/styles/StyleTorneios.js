@@ -89,4 +89,14 @@ export const stylesTorneios = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
+  videoContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "black",
+  },
+  video: {
+    width: "1550%",
+    height: "50%",
+  },
 });
