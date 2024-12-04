@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; // Importação do React e hooks useEffect e useState
 import {
   View,
   Text,
@@ -7,61 +7,63 @@ import {
   TouchableOpacity,
   ImageBackground,
   StyleSheet,
-} from "react-native";
-import { styles } from "../styles/StyleDetalhesDoJogo";
-import axios from "axios";
-import moment from "moment-timezone";
-import { API_FOOTBALL_KEY } from "@env";
+} from "react-native"; // Importação de componentes básicos do React Native
+import { styles } from "../styles/StyleDetalhesDoJogo"; // Estilos personalizados
+import axios from "axios"; // Biblioteca para requisições HTTP
+import moment from "moment-timezone"; // Biblioteca para manipulação de datas e fusos horários
+import { API_FOOTBALL_KEY } from "@env"; // Chave da API como variável de ambiente
 import {
   FontAwesome5,
   MaterialIcons,
   Ionicons,
   MaterialCommunityIcons,
   FontAwesome6,
-} from "@expo/vector-icons";
-import { Video, ResizeMode } from "expo-av";
-import { useNavigation } from "@react-navigation/native";
-import TabelaComponent from "../components/TabelaComponent";
+} from "@expo/vector-icons"; // Conjunto de ícones
+import { Video, ResizeMode } from "expo-av"; // Biblioteca de vídeos
+import { useNavigation } from "@react-navigation/native"; // Hook para navegação entre telas
+import TabelaComponent from "../components/TabelaComponent"; // Componente para exibição de tabelas
 
+// Componente principal
 export default function DetalhesDoJogo({ route }) {
-  const { jogoId } = route.params;
-  const [jogo, setJogo] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [minutagem, setMinutagem] = useState(null);
-  const [showHomeTeam, setShowHomeTeam] = useState(true);
-  const [h2hData, setH2hData] = useState([]);
+  const { jogoId } = route.params; // Obtém o ID do jogo a partir dos parâmetros da rota
+  const [jogo, setJogo] = useState(null); // Estado para armazenar os detalhes do jogo
+  const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
+  const [minutagem, setMinutagem] = useState(null); // Estado para a minutagem do jogo ao vivo
+  const [showHomeTeam, setShowHomeTeam] = useState(true); // Alterna a exibição entre times
+  const [h2hData, setH2hData] = useState([]); // Dados de confrontos diretos (head-to-head)
+  const [opcaoSelecionada, setOpcaoSelecionada] = useState("Eventos"); // Aba ativa selecionada
 
-  const [opcaoSelecionada, setOpcaoSelecionada] = useState("Eventos");
+  const navigation = useNavigation(); // Hook de navegação
 
-  const navigation = useNavigation();
-
+  // Função para buscar os detalhes do jogo
   useEffect(() => {
     const fetchDetalhesDoJogo = async () => {
       try {
         const response = await axios.get(
           `https://v3.football.api-sports.io/fixtures`,
           {
-            params: { id: jogoId },
+            params: { id: jogoId }, // Passa o ID do jogo como parâmetro
             headers: {
-              "x-rapidapi-key": API_FOOTBALL_KEY,
-              "x-rapidapi-host": "v3.football.api-sports.io",
+              "x-rapidapi-key": API_FOOTBALL_KEY, // Chave da API
+              "x-rapidapi-host": "v3.football.api-sports.io", // Host da API
             },
           }
         );
         if (response.data.response && response.data.response.length > 0) {
-          setJogo(response.data.response[0]);
-          setMinutagem(response.data.response[0].fixture.status.elapsed || 0);
+          setJogo(response.data.response[0]); // Armazena os detalhes do jogo
+          setMinutagem(response.data.response[0].fixture.status.elapsed || 0); // Define a minutagem inicial
         }
       } catch (error) {
-        console.error("Erro ao buscar detalhes do jogo:", error);
+        console.error("Erro ao buscar detalhes do jogo:", error); // Loga erros de requisição
       } finally {
-        setLoading(false);
+        setLoading(false); // Finaliza o estado de carregamento
       }
     };
 
     fetchDetalhesDoJogo();
-  }, [jogoId]);
+  }, [jogoId]); // Atualiza quando o ID do jogo muda
 
+  // Atualiza a minutagem do jogo ao vivo
   useEffect(() => {
     let intervalId;
     if (
@@ -71,21 +73,22 @@ export default function DetalhesDoJogo({ route }) {
         jogo.fixture.status.short === "2H")
     ) {
       intervalId = setInterval(() => {
-        setMinutagem((prevMinutagem) => prevMinutagem + 1);
-      }, 30000); // Atualiza a cada 30 segundos
+        setMinutagem((prevMinutagem) => prevMinutagem + 1); // Incrementa a cada 30 segundos
+      }, 30000);
     }
 
     return () => {
       if (intervalId) {
-        clearInterval(intervalId); // Limpa o intervalo quando o componente for desmontado
+        clearInterval(intervalId); // Limpa o intervalo ao desmontar o componente
       }
     };
   }, [jogo]);
 
+  // Busca os dados de confrontos diretos (head-to-head) entre os times
   useEffect(() => {
     const fetchH2HData = async () => {
       if (teams?.home?.id && teams?.away?.id) {
-        // Verifique se teams está definido
+        // Verifica se os IDs dos times estão definidos
         try {
           const response = await axios.get(
             "https://v3.football.api-sports.io/fixtures/headtohead",
@@ -95,7 +98,7 @@ export default function DetalhesDoJogo({ route }) {
                 "x-rapidapi-host": "v3.football.api-sports.io",
               },
               params: {
-                h2h: `${teams.home.id}-${teams.away.id}`,
+                h2h: `${teams.home.id}-${teams.away.id}`, // Passa os IDs dos times como parâmetro
               },
             }
           );
@@ -113,15 +116,16 @@ export default function DetalhesDoJogo({ route }) {
     ) {
       fetchH2HData();
     }
-  }, [opcaoSelecionada, teams]); // Adicione "teams" como dependência
+  }, [opcaoSelecionada, teams]);
 
+  // Exibição de carregamento
   if (loading) {
     return (
       <View style={stylesVideo.videoContainer}>
         <Video
           style={stylesVideo.video}
           resizeMode={ResizeMode.CONTAIN}
-          source={require("../assets/Images/Video/loading.mp4")}
+          source={require("../assets/Images/Video/loading.mp4")} // Vídeo de carregamento
           shouldPlay
           isLooping={false}
           isMuted={true}
@@ -131,6 +135,7 @@ export default function DetalhesDoJogo({ route }) {
     );
   }
 
+  // Caso não seja possível carregar os dados do jogo
   if (!jogo) {
     return (
       <View style={styles.errorContainer}>
@@ -141,26 +146,31 @@ export default function DetalhesDoJogo({ route }) {
     );
   }
 
+  // Desestruturação dos dados do jogo
   const { teams, fixture, lineups, statistics, events, goals, league } = jogo;
 
+  // Formata a data e horário do jogo
   const dataHoraJogo = moment
     .tz(fixture.date, "America/Sao_Paulo")
     .format("DD/MM/YYYY HH:mm");
 
+  // Função para calcular porcentagem de valores
   const calcularPorcentagem = (valorA, valorB) => {
     const total = valorA + valorB;
-    if (total === 0) return [50, 50];
+    if (total === 0) return [50, 50]; // Valores padrão se o total for 0
     const porcentagemA = (valorA / total) * 100;
     const porcentagemB = (valorB / total) * 100;
     return [porcentagemA, porcentagemB];
   };
 
+  // Função para extrair informações sobre a rodada
   const extrairRodada = (round) => {
-    if (!round) return ""; // Verifica se existe o valor
+    if (!round) return ""; // Verifica se o valor existe
     const partes = round.split(" - "); // Divide a string pelo " - "
-    return partes[1] ? partes[1] : round; // Retorna a segunda parte (rodada ou fase) ou a string completa se não houver " - "
+    return partes[1] ? partes[1] : round; // Retorna a segunda parte ou a string completa
   };
 
+  // Identificação do status do jogo
   const jogoEncerrado = fixture.status.short === "FT";
   const jogoAoVivo =
     fixture.status.short === "LIVE" ||
@@ -174,6 +184,7 @@ export default function DetalhesDoJogo({ route }) {
   const JogoCancelado = fixture.status.short === "CANC";
   const JogoAbandonado = fixture.status.short === "ABD";
 
+  // Função para renderizar ícones de eventos
   const renderEventIcon = (event) => {
     switch (event.type) {
       case "Goal":
@@ -187,7 +198,6 @@ export default function DetalhesDoJogo({ route }) {
               style={styles.imagemEventos}
             />
           );
-          // Pênalti perdido
         } else if (event.detail === "Penalty") {
           return (
             <Image
@@ -195,7 +205,7 @@ export default function DetalhesDoJogo({ route }) {
               resizeMode="contain"
               style={styles.imagemEventos}
             />
-          ); // Pênalti convertido
+          );
         } else {
           return <FontAwesome5 name="futbol" size={16} color="green" />; // Gol normal
         }
@@ -222,9 +232,7 @@ export default function DetalhesDoJogo({ route }) {
               style={styles.imagemEventos}
             />
           );
-        }
-        // Gol anulado
-        else if (event.detail === "Penalty confirmed") {
+        } else if (event.detail === "Penalty confirmed") {
           return (
             <Image
               source={require("../assets/Images/penalticonfirmado.png")}
@@ -232,7 +240,7 @@ export default function DetalhesDoJogo({ route }) {
               style={styles.imagemEventos}
             />
           );
-        } // Penalti confrmado
+        }
         break;
       case "subst":
         return (

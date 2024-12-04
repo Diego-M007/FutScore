@@ -249,10 +249,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   resultadoAoVivo: {
-    fontSize: 16,
+    fontSize: 14,
     color: "white",
     fontWeight: "bold",
     textAlign: "center",
+    justifyContent: "center",
   },
   penaltyScore: {
     fontSize: 12,
@@ -261,9 +262,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   ContainResultado: {
-    flexDirection: "row",
+    flexDirection: "column",
     flexWrap: "wrap",
-    justifyContent: "center",
+    marginHorizontal: 10,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: "#2f9fa6",
+    paddingHorizontal: "3%",
   },
 });
 

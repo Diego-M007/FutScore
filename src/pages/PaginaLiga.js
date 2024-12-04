@@ -25,6 +25,7 @@ const PaginaLiga = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [opcaoSelecionada, setOpcaoSelecionada] = useState("Tabela");
   const [modalVisible, setModalVisible] = useState(false);
+  const [ligaDetalhes, setLigaDetalhes] = useState(null); // Estado para armazenar detalhes da liga
 
   const temporadas = Array.from(
     { length: 10 },
@@ -37,6 +38,21 @@ const PaginaLiga = ({ route, navigation }) => {
     const carregarDadosDaLiga = async () => {
       setLoading(true);
       try {
+        // Carregar detalhes da liga
+        const responseLiga = await axios.get(
+          `https://v3.football.api-sports.io/leagues`,
+          {
+            params: { id: ligaId },
+            headers: {
+              "x-rapidapi-key": API_FOOTBALL_KEY,
+              "x-rapidapi-host": "v3.football.api-sports.io",
+            },
+          }
+        );
+        const detalhes = responseLiga.data.response[0];
+        setLigaDetalhes(detalhes);
+
+        // Carregar jogos
         const responseJogos = await axios.get(
           `https://v3.football.api-sports.io/fixtures`,
           {
@@ -49,6 +65,7 @@ const PaginaLiga = ({ route, navigation }) => {
         );
         setJogos(responseJogos.data.response);
 
+        // Carregar artilheiros
         const responseArtilheiros = await axios.get(
           `https://v3.football.api-sports.io/players/topscorers`,
           {
@@ -61,6 +78,7 @@ const PaginaLiga = ({ route, navigation }) => {
         );
         setArtilheiros(responseArtilheiros.data.response);
 
+        // Carregar assistentes
         const responseAssistentes = await axios.get(
           `https://v3.football.api-sports.io/players/topassists`,
           {
@@ -80,7 +98,7 @@ const PaginaLiga = ({ route, navigation }) => {
     };
 
     carregarDadosDaLiga();
-  }, [ligaId, anoSelecionado]); // Aqui o anoSelecionado é adicionado como dependência para recarregar ao mudar o ano
+  }, [ligaId, anoSelecionado]);
 
   const selecionarAno = (ano) => {
     setAnoSelecionado(ano);
@@ -207,7 +225,15 @@ const PaginaLiga = ({ route, navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Informações da Liga</Text>
+      {ligaDetalhes && (
+        <View style={styles.ligaHeader}>
+          <Image
+            source={{ uri: ligaDetalhes.league.logo }}
+            style={styles.ligaLogo}
+          />
+          <Text style={styles.ligaNome}>{ligaDetalhes.league.name}</Text>
+        </View>
+      )}
 
       <View style={styles.yearSelector}>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -313,6 +339,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FFF",
     marginBottom: 16,
+    justifyContent: "center",
+  },
+  ligaHeader: {
+    flexDirection: "column",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  ligaLogo: {
+    width: 80,
+    height: 80,
+  },
+  ligaNome: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "#FFF",
   },
   selectedYearText: {
     fontSize: 18,

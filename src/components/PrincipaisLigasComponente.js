@@ -5,94 +5,103 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  Animated,
-  Easing,
   FlatList,
 } from "react-native";
 import axios from "axios";
 import moment from "moment-timezone";
 
-// Array com IDs das ligas que queremos filtrar
-
+// Componente principal que exibe os jogos filtrados de ligas específicas
 const LigasEspecificasComponent = () => {
-  const [jogos, setJogos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jogos, setJogos] = useState([]); // Estado para armazenar os jogos buscados
+  const [loading, setLoading] = useState(true); // Estado para indicar se os dados estão carregando
 
-  const ligasEspecificas = [123, 456, 789]; // Exemplo: Libertadores, Sul-Americana, Brasileirão
+  // Lista de ligas específicas que quero filtrar (IDs das ligas)
+  const ligasEspecificas = [123, 456, 789]; // Exemplo de IDs: Libertadores, Sul-Americana, Brasileirão
 
-  // Função para buscar os jogos do dia
+  // Hook que roda uma vez ao carregar o componente para buscar os jogos do dia
   useEffect(() => {
     const fetchJogos = async () => {
       try {
+        // Fazendo a chamada à API para buscar os jogos do dia
         const response = await axios.get(
           "https://v3.football.api-sports.io/fixtures",
           {
             headers: {
-              "x-rapidapi-key": API_FOOTBALL_KEY, // Sua chave da API
+              "x-rapidapi-key": API_FOOTBALL_KEY, // Minha chave da API
               "x-rapidapi-host": "v3.football.api-sports.io",
             },
             params: {
-              timezone: "America/Sao_Paulo",
-              date: moment().format("YYYY-MM-DD"),
+              timezone: "America/Sao_Paulo", // Definindo o fuso horário
+              date: moment().format("YYYY-MM-DD"), // Pegando a data de hoje no formato correto
             },
           }
         );
-        const jogosDoDia = response.data.response;
-        setJogos(jogosDoDia);
-        setLoading(false);
+        const jogosDoDia = response.data.response; // Pegando a lista de jogos da resposta
+        setJogos(jogosDoDia); // Salvando os jogos no estado
+        setLoading(false); // Indicando que o carregamento terminou
       } catch (error) {
-        console.error("Erro ao buscar os jogos:", error);
-        setLoading(false);
+        console.error("Erro ao buscar os jogos:", error); // Tratando o erro no console
+        setLoading(false); // Mesmo com erro, marcamos o carregamento como concluído
       }
     };
-    fetchJogos();
-  }, []);
 
-  // Função para filtrar os jogos pelas ligas específicas
+    fetchJogos(); // Chamando a função
+  }, []); // O array vazio significa que roda apenas uma vez
+
+  // Função para filtrar os jogos pelas ligas que coloquei no array
   const filtrarJogosPorLigas = (jogos) => {
     return jogos.filter((jogo) => ligasEspecificas.includes(jogo.league.id));
   };
 
-  // Função para renderizar cada card de competição com os jogos filtrados
+  // Função que renderiza os cards de competição com os jogos
   const renderCompeticaoCard = ({ item }) => {
+    // Filtrando apenas os jogos das ligas que me interessam
     const jogosCompeticao = filtrarJogosPorLigas(item.jogos);
 
     return (
       <TouchableOpacity onPress={() => {}}>
         <View style={styles.card}>
+          {/* Mostra a imagem da competição */}
           <Image source={{ uri: item.imagem }} style={styles.imagem} />
           <View style={styles.info}>
+            {/* Nome da competição */}
             <Text style={styles.nome}>{item.nome}</Text>
+            {/* Quantidade de jogos na competição */}
             <Text
               style={styles.quantidadeJogos}
             >{`${jogosCompeticao.length} jogos`}</Text>
           </View>
         </View>
+        {/* Exibindo os jogos da competição */}
         {jogosCompeticao.map((jogo) => (
           <View key={jogo.fixtureId} style={styles.jogoContainer}>
             <Text style={styles.equipes}>
-              {jogo.timeCasa} vs {jogo.timeVisitante}
+              {jogo.timeCasa} vs {jogo.timeVisitante} {/* Exibe os times */}
             </Text>
-            <Text style={styles.horario}>{jogo.horario}</Text>
+            <Text style={styles.horario}>{jogo.horario}</Text>{" "}
+            {/* Exibe o horário */}
           </View>
         ))}
       </TouchableOpacity>
     );
   };
 
+  // Enquanto os dados estão carregando, mostro uma mensagem
   if (loading) {
     return <Text>Carregando jogos...</Text>;
   }
 
+  // Exibe a lista de competições com os jogos
   return (
     <FlatList
-      data={jogos}
-      renderItem={renderCompeticaoCard}
-      keyExtractor={(item) => item.nome}
+      data={jogos} // Lista de jogos que buscamos
+      renderItem={renderCompeticaoCard} // Função para renderizar cada item
+      keyExtractor={(item) => item.nome} // Chave única para cada item (usada no React Native)
     />
   );
 };
 
+// Estilos para o layout do componente
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
